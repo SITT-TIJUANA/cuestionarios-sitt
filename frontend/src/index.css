@@ -97,7 +97,29 @@ button {
   transition: width 0.3s ease;
 }
 
-/* ===== Fondo animado con el motivo Xiuhcóatl ===== */
+/* ===== Fondo guinda de cierre (agradecimiento) ===== */
+.fondo-guinda {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 20%, var(--guinda-alt), var(--guinda) 55%, #3d0020 100%);
+  overflow: hidden;
+  z-index: -1;
+}
+.fondo-guinda::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  width: 500px;
+  height: 500px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(192,162,82,0.35), transparent 70%);
+  animation: pulsoDorado 5s ease-in-out infinite;
+}
+@keyframes pulsoDorado {
+  0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.9; transform: translateX(-50%) scale(1.15); }
+}
 .fondo-xiuhcoatl {
   position: fixed;
   inset: 0;
@@ -128,12 +150,21 @@ button {
   to { transform: translateX(-33.333%); }
 }
 
-/* ===== Escudo con profundidad (tilt) ===== */
+/* ===== Escudo con profundidad, brillo y flotación ===== */
 .escudo-tilt {
-  width: 92px;
+  width: 168px;
   transition: transform 0.15s ease-out;
   transform-style: preserve-3d;
-  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
+  filter: drop-shadow(0 14px 24px rgba(0,0,0,0.4)) drop-shadow(0 0 22px rgba(192,162,82,0.55));
+  animation: flotar 4.5s ease-in-out infinite, brillar 3s ease-in-out infinite;
+}
+@keyframes flotar {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -10px; }
+}
+@keyframes brillar {
+  0%, 100% { filter: drop-shadow(0 14px 24px rgba(0,0,0,0.4)) drop-shadow(0 0 16px rgba(192,162,82,0.4)); }
+  50% { filter: drop-shadow(0 14px 24px rgba(0,0,0,0.4)) drop-shadow(0 0 34px rgba(192,162,82,0.85)); }
 }
 
 /* ===== Botón institucional (Uiverse, código de Jair) ===== */

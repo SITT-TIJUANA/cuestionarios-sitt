@@ -23,6 +23,7 @@ export const api = {
   crearSesion: (cuestionario_id) => peticion('/api/sesiones', { method: 'POST', body: JSON.stringify({ cuestionario_id }) }),
   guardarRespuesta: (data) => peticion('/api/respuestas', { method: 'POST', body: JSON.stringify(data) }),
   completarSesion: (token) => peticion(`/api/sesiones/${token}/completar`, { method: 'POST' }),
+  datosReporte: (token) => peticion(`/api/reportes/${token}/datos`),
   urlReporte: (token) => `${API_URL}/api/reportes/${token}`,
 
   // admin
