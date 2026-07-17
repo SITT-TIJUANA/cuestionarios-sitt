@@ -13,7 +13,8 @@ const vacio = { tipo: 'opcion_multiple', texto: '', opciones: opcionesVacias() }
 const ETIQUETAS_TIPO = {
   opcion_multiple: 'Opción múltiple',
   escala: 'Escala 1-10',
-  libre: 'Respuesta libre'
+  libre: 'Respuesta libre',
+  completar: 'Completar la oración'
 };
 
 export default function Preguntas() {
@@ -94,6 +95,7 @@ export default function Preguntas() {
             <option value="opcion_multiple">Opción múltiple (elegir A / B / C)</option>
             <option value="escala">Escala 1-10 (autoevaluación)</option>
             <option value="libre">Respuesta libre (texto escrito)</option>
+            <option value="completar">Completar la oración (rellenar espacio)</option>
           </select>
 
           <textarea placeholder="Texto de la pregunta" required value={form.texto} onChange={(e) => setForm({ ...form, texto: e.target.value })}
@@ -124,6 +126,12 @@ export default function Preguntas() {
           )}
           {form.tipo === 'libre' && (
             <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>El empleado va a escribir su respuesta en un cuadro de texto abierto.</p>
+          )}
+          {form.tipo === 'completar' && (
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
+              Escribe la oración usando <code>___</code> (tres guiones bajos) donde debe ir el espacio en blanco.
+              Ejemplo: "El servidor público debe actuar con ___ en todo momento."
+            </p>
           )}
 
           <div style={{ display: 'flex', gap: 8 }}>

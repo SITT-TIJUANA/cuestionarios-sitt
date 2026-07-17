@@ -120,6 +120,10 @@ router.get('/reportes/:token', async (req, res) => {
       } else if (f.tipo === 'escala') {
         doc.font('Helvetica').fontSize(9).fillColor(NEGRO)
           .text(`Calificación: ${f.valor_escala}/10`, 60, y, { width: W - 120 });
+      } else if (f.tipo === 'completar') {
+        const completada = f.pregunta.replace(/_{3,}/, f.texto_respuesta || '____');
+        doc.font('Helvetica-Oblique').fontSize(9).fillColor(NEGRO)
+          .text(`"${completada}"`, 60, y, { width: W - 120 });
       } else {
         doc.font('Helvetica-Oblique').fontSize(9).fillColor(NEGRO)
           .text(`"${f.texto_respuesta || '(sin respuesta)'}"`, 60, y, { width: W - 120 });

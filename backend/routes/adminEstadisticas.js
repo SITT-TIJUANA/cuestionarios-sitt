@@ -45,14 +45,14 @@ router.get('/promedios/:cuestionarioId', async (req, res) => {
   res.json(filas);
 });
 
-// Respuestas de texto libre, agrupadas por pregunta
+// Respuestas de texto libre y "completar la oración", agrupadas por pregunta
 router.get('/libres/:cuestionarioId', async (req, res) => {
   const { cuestionarioId } = req.params;
   const filas = await sql`
     SELECT p.id AS pregunta_id, p.texto AS pregunta, p.orden, r.texto_respuesta, r.creado_en
     FROM preguntas p
     JOIN respuestas r ON r.pregunta_id = p.id
-    WHERE p.cuestionario_id = ${cuestionarioId} AND p.tipo = 'libre' AND r.texto_respuesta IS NOT NULL
+    WHERE p.cuestionario_id = ${cuestionarioId} AND p.tipo IN ('libre', 'completar') AND r.texto_respuesta IS NOT NULL
     ORDER BY p.orden ASC, r.creado_en DESC
   `;
   const agrupadas = {};

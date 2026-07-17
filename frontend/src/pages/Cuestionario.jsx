@@ -4,6 +4,11 @@ import { api } from '../lib/api';
 import CheckUiverse from '../components/CheckUiverse';
 import BotonSitt from '../components/BotonSitt';
 
+function dividirEnBlanco(texto) {
+  const partes = texto.split(/_{3,}/);
+  return partes.length > 1 ? [partes[0], partes.slice(1).join('___')] : [texto, ''];
+}
+
 export default function Cuestionario() {
   const [cuestionario] = useState(() => JSON.parse(sessionStorage.getItem('cuestionario') || 'null'));
   const [indice, setIndice] = useState(0);
@@ -44,7 +49,8 @@ export default function Cuestionario() {
 
   const faltaResponder =
     (pregunta.tipo === 'opcion_multiple' && !valorActual) ||
-    (pregunta.tipo === 'libre' && !valorActual?.trim());
+    (pregunta.tipo === 'libre' && !valorActual?.trim()) ||
+    (pregunta.tipo === 'completar' && !valorActual?.trim());
 
   return (
     <div className="contenedor">
@@ -64,7 +70,9 @@ export default function Cuestionario() {
         <img src={pregunta.imagen_url} alt="" style={{ width: '100%', borderRadius: 14, marginBottom: 16, aspectRatio: '4/3', objectFit: 'cover' }} />
       )}
 
-      <h2 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.4, margin: '0 0 20px' }}>{pregunta.texto}</h2>
+      {pregunta.tipo !== 'completar' && (
+        <h2 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.4, margin: '0 0 20px' }}>{pregunta.texto}</h2>
+      )}
 
       {pregunta.tipo === 'opcion_multiple' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -112,6 +120,28 @@ export default function Cuestionario() {
           }}
         />
       )}
+
+      {pregunta.tipo === 'completar' && (() => {
+        const [antes, despues] = dividirEnBlanco(pregunta.texto);
+        return (
+          <p style={{ fontSize: 18, fontWeight: 600, lineHeight: 2.1, margin: '0 0 20px' }}>
+            {antes}
+            <input
+              type="text"
+              value={valorActual || ''}
+              onChange={(e) => elegir(e.target.value)}
+              placeholder="……"
+              style={{
+                display: 'inline-block', width: 160, margin: '0 4px', padding: '4px 8px',
+                borderRadius: 8, border: 'none', borderBottom: '2px solid var(--guinda)',
+                fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: 16, textAlign: 'center',
+                background: '#FAF1EC'
+              }}
+            />
+            {despues}
+          </p>
+        );
+      })()}
 
       <div style={{ flex: 1 }} />
       <div style={{ marginTop: 20 }}>
