@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import CheckUiverse from '../components/CheckUiverse';
 import BotonSitt from '../components/BotonSitt';
+import FondoParticulas from '../components/FondoParticulas';
 
 function dividirEnBlanco(texto) {
   const partes = texto.split(/_{3,}/);
@@ -53,7 +54,9 @@ export default function Cuestionario() {
     (pregunta.tipo === 'completar' && !valorActual?.trim());
 
   return (
-    <div className="contenedor">
+    <>
+      <FondoParticulas />
+      <div className="contenedor">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
         {indice > 0 && (
           <button onClick={() => setIndice((i) => i - 1)} style={{ background: 'none', border: 'none', fontSize: 20, color: 'var(--guinda)' }}>←</button>
@@ -151,5 +154,6 @@ export default function Cuestionario() {
         </BotonSitt>
       </div>
     </div>
+    </>
   );
 }

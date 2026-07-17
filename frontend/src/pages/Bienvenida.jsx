@@ -55,32 +55,34 @@ export default function Bienvenida() {
       <div
         className="contenedor"
         style={{
-          justifyContent: 'center', alignItems: 'center', textAlign: 'center',
-          opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(14px)',
-          transition: 'opacity 0.6s ease, transform 0.6s ease'
+          justifyContent: 'space-between', alignItems: 'center', textAlign: 'center',
+          minHeight: '100dvh', padding: '48px 24px',
+          opacity: visible ? 1 : 0, transition: 'opacity 0.6s ease'
         }}
       >
-        <p style={{ fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--dorado)', fontWeight: 600, marginBottom: 24 }}>
+        <p style={{ fontSize: 15, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--dorado)', fontWeight: 700, margin: 0 }}>
           XXV Ayuntamiento de Tijuana
         </p>
 
-        <EscudoTilt />
-
-        <h1 className="voz" style={{ fontSize: 26, fontWeight: 700, margin: '24px 0 8px', color: 'white' }}>
-          {cuestionario.titulo}
-        </h1>
-        <p style={{ fontSize: 14, color: 'var(--crema)', lineHeight: 1.6, margin: '0 0 24px', opacity: 0.85 }}>
-          {cuestionario.descripcion || 'Tus respuestas son completamente anónimas.'}
-        </p>
-
-        <div style={{ display: 'flex', gap: 20, marginBottom: 32, fontSize: 12, color: 'var(--crema)', opacity: 0.75 }}>
-          <span>{cuestionario.tiempo_estimado_min} min</span>
-          <span>Anónimo</span>
-          <span>Reporte al final</span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+          <EscudoTilt />
+          <h1 className="voz" style={{ fontSize: 40, fontWeight: 700, margin: 0, color: 'white', lineHeight: 1.15 }}>
+            {cuestionario.titulo}
+          </h1>
+          <p style={{ fontSize: 17, color: 'var(--crema)', lineHeight: 1.6, margin: 0, opacity: 0.9, maxWidth: 340 }}>
+            {cuestionario.descripcion || 'Tus respuestas son completamente anónimas.'}
+          </p>
         </div>
 
-        <BotonSitt onClick={comenzar}>Comenzar</BotonSitt>
-        <p style={{ fontSize: 11, color: 'var(--dorado)', marginTop: 20, opacity: 0.8 }}>Ética que transforma Tijuana</p>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 26 }}>
+          <div style={{ display: 'flex', gap: 24, fontSize: 13, color: 'var(--crema)', opacity: 0.8 }}>
+            <span>{cuestionario.tiempo_estimado_min} min</span>
+            <span>Anónimo</span>
+            <span>Reporte al final</span>
+          </div>
+          <BotonSitt onClick={comenzar}>Comenzar</BotonSitt>
+          <p style={{ fontSize: 12, color: 'var(--dorado)', margin: 0, opacity: 0.85 }}>Ética que transforma Tijuana</p>
+        </div>
       </div>
     </>
   );

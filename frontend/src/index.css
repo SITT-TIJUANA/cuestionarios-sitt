@@ -111,7 +111,28 @@ button {
   transition: width 0.3s ease;
 }
 
-/* ===== Fondo guinda de cierre (agradecimiento) ===== */
+/* ===== Fondo de partículas doradas cayendo (pantallas de preguntas) ===== */
+.fondo-particulas {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: -1;
+  background: var(--cream);
+}
+.particula {
+  position: absolute;
+  top: -20px;
+  border-radius: 50%;
+  background: var(--dorado);
+  animation-name: caer;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes caer {
+  0% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(50vh) translateX(14px); }
+  100% { transform: translateY(105vh) translateX(-10px); }
+}
 .fondo-guinda {
   position: fixed;
   inset: 0;
@@ -166,7 +187,8 @@ button {
 
 /* ===== Escudo con profundidad, brillo y flotación ===== */
 .escudo-tilt {
-  width: 168px;
+  width: 240px;
+  max-width: 62vw;
   transition: transform 0.15s ease-out;
   transform-style: preserve-3d;
   filter: drop-shadow(0 14px 24px rgba(0,0,0,0.4)) drop-shadow(0 0 22px rgba(192,162,82,0.55));
@@ -260,7 +282,7 @@ input[type="range"].control-escala::-moz-range-track {
 .check {
   cursor: pointer;
   position: relative;
-  margin: auto;
+  margin: 0;
   width: 18px;
   height: 18px;
   -webkit-tap-highlight-color: transparent;
