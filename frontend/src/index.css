@@ -187,8 +187,8 @@ button {
 
 /* ===== Escudo con profundidad, brillo y flotación ===== */
 .escudo-tilt {
-  width: 240px;
-  max-width: 62vw;
+  width: 100%;
+  display: block;
   transition: transform 0.15s ease-out;
   transform-style: preserve-3d;
   filter: drop-shadow(0 14px 24px rgba(0,0,0,0.4)) drop-shadow(0 0 22px rgba(192,162,82,0.55));
