@@ -1,0 +1,82 @@
+:root {
+  --guinda: #7B1D1D;
+  --guinda-dark: #5A1515;
+  --gold: #C9A84C;
+  --ink: #2B2118;
+  --cream: #FBF9F6;
+  --card: #FFFFFF;
+  --border: #E5E0D6;
+  --text-muted: #8A8478;
+  --teal: #1F6F64;
+  --success: #0F6E56;
+  --danger: #993C1D;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+}
+
+h1, h2, .voz {
+  font-family: 'Fraunces', serif;
+}
+
+button {
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+.contenedor {
+  max-width: 440px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px;
+}
+
+.boton-primario {
+  width: 100%;
+  padding: 15px;
+  background: var(--guinda);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.boton-primario:disabled { opacity: 0.4; }
+
+.boton-secundario {
+  width: 100%;
+  padding: 15px;
+  background: transparent;
+  color: var(--guinda);
+  border: 1.5px solid var(--guinda);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tarjeta {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.barra-progreso {
+  height: 6px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.barra-progreso-relleno {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
