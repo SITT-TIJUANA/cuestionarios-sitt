@@ -9,28 +9,33 @@ export default function Gracias() {
   const token = sessionStorage.getItem('sesion_token');
   const navigate = useNavigate();
   const [descargando, setDescargando] = useState(false);
-  const [aviso, setAviso] = useState('');
+  const [vistaPrevia, setVistaPrevia] = useState(null);
 
   async function descargarReporte() {
     setDescargando(true);
-    setAviso('');
     try {
       const datos = await api.datosReporte(token);
       const blob = await generarImagenCertificado(datos);
       const url = URL.createObjectURL(blob);
+
       const a = document.createElement('a');
       a.href = url;
       a.download = 'reconocimiento-etica.png';
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
-      setAviso('Listo — revisa tus descargas. En Android suele guardarse directo en la galería; en iPhone queda en la app Archivos (mantén presionada la imagen y elige "Agregar a Fotos").');
+
+      setVistaPrevia(url);
     } catch {
-      setAviso('No se pudo generar la imagen. Intenta de nuevo.');
+      alert('No se pudo generar la imagen. Intenta de nuevo.');
     } finally {
       setDescargando(false);
     }
+  }
+
+  function cerrarVistaPrevia() {
+    if (vistaPrevia) URL.revokeObjectURL(vistaPrevia);
+    setVistaPrevia(null);
   }
 
   function volverAlInicio() {
@@ -41,6 +46,27 @@ export default function Gracias() {
   function cerrar() {
     window.close();
     setTimeout(volverAlInicio, 300);
+  }
+
+  if (vistaPrevia) {
+    return (
+      <>
+        <FondoGuinda />
+        <div className="contenedor" style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <p style={{ fontSize: 13, color: 'var(--crema)', marginBottom: 14, textAlign: 'center' }}>
+            Ya se descargó a tu celular — aquí tienes una vista previa:
+          </p>
+          <img
+            src={vistaPrevia}
+            alt="Vista previa de tu reconocimiento"
+            style={{ width: '100%', borderRadius: 16, border: '1px solid rgba(255,255,255,0.15)', marginBottom: 20 }}
+          />
+          <button className="boton-secundario" style={{ borderColor: 'var(--crema)', color: 'var(--crema)' }} onClick={cerrarVistaPrevia}>
+            Cerrar vista previa
+          </button>
+        </div>
+      </>
+    );
   }
 
   return (
@@ -66,7 +92,6 @@ export default function Gracias() {
           <BotonSitt onClick={descargarReporte} disabled={descargando}>
             {descargando ? 'Generando…' : 'Descargar mi reporte'}
           </BotonSitt>
-          {aviso && <p style={{ fontSize: 12, color: 'var(--crema)', opacity: 0.85, lineHeight: 1.5 }}>{aviso}</p>}
           <button className="boton-secundario" style={{ borderColor: 'var(--crema)', color: 'var(--crema)' }} onClick={volverAlInicio}>
             Volver al inicio
           </button>

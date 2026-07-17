@@ -45,6 +45,9 @@ export async function generarImagenCertificado(datos) {
   ctx.lineWidth = 1;
   ctx.strokeRect(46, 46, W - 92, H - 92);
 
+  let serpiente = null;
+  try { serpiente = await cargarImagen('/cuestionarios-sitt/images/xiuhcoatl.png'); } catch {}
+
   try {
     const logo = await cargarImagen('/cuestionarios-sitt/images/escudo-tijuana.png');
     const alto = 130, ancho = alto * (logo.width / logo.height);
@@ -57,15 +60,15 @@ export async function generarImagenCertificado(datos) {
   ctx.fillText('XXV AYUNTAMIENTO DE TIJUANA', W / 2, 262);
 
   ctx.fillStyle = 'white';
-  ctx.font = '700 46px Poppins, sans-serif';
-  ctx.fillText('Reconocimiento', W / 2, 340);
-  ctx.fillText('de participación', W / 2, 396);
+  ctx.font = '700 60px Poppins, sans-serif';
+  ctx.fillText('Reconocimiento', W / 2, 350);
+  ctx.fillText('de participación', W / 2, 420);
 
   ctx.font = '400 22px Inter, sans-serif';
   ctx.fillStyle = CREMA;
-  envolverTexto(ctx, `Por completar el ${datos.titulo}, reafirmando tu compromiso con los valores del Código de Ética institucional.`, W / 2, 450, W - 220, 30);
+  envolverTexto(ctx, `Por completar el ${datos.titulo}, reafirmando tu compromiso con los valores del Código de Ética institucional.`, W / 2, 475, W - 220, 30);
 
-  let y = 560;
+  let y = 590;
   if (datos.total > 0) {
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
     ctx.beginPath();
@@ -78,22 +81,39 @@ export async function generarImagenCertificado(datos) {
     ctx.fillStyle = 'white';
     ctx.fillText('respuestas alineadas al Código de Ética', W / 2, y + 130);
     y += 190;
+  } else {
+    y += 20;
   }
+
+  // Franja decorativa dorada con el motivo Xiuhcóatl, para llenar el espacio con estilo
+  if (serpiente) {
+    const altoIcono = 34, anchoIcono = altoIcono * (serpiente.width / serpiente.height);
+    ctx.globalAlpha = 0.55;
+    let ix = W / 2 - (anchoIcono * 3 + 60);
+    for (let i = 0; i < 3; i++) {
+      ctx.drawImage(serpiente, ix, y, anchoIcono, altoIcono);
+      ix += anchoIcono + 30;
+    }
+    ctx.globalAlpha = 1;
+    y += altoIcono + 30;
+  }
+
+  ctx.font = '500 22px Inter, sans-serif';
+  ctx.fillStyle = 'white';
+  y = envolverTexto(ctx, 'Gracias por tu compromiso con la ética pública en Tijuana.', W / 2, y, W - 260, 30);
+  y += 24;
 
   ctx.font = '600 22px Inter, sans-serif';
   ctx.textAlign = 'left';
-  let by = y;
-  for (const f of datos.filas.slice(0, 6)) {
-    if (f.tipo === 'escala') {
-      ctx.fillStyle = 'white';
-      ctx.fillText(f.pregunta, 120, by);
-      const barX = 120, barW = W - 240, barY = by + 12;
-      ctx.fillStyle = 'rgba(255,255,255,0.15)';
-      ctx.beginPath(); ctx.roundRect(barX, barY, barW, 14, 7); ctx.fill();
-      ctx.fillStyle = DORADO;
-      ctx.beginPath(); ctx.roundRect(barX, barY, barW * (f.valor_escala / 10), 14, 7); ctx.fill();
-      by += 62;
-    }
+  for (const f of datos.filas.filter(f => f.tipo === 'escala').slice(0, 6)) {
+    ctx.fillStyle = 'white';
+    ctx.fillText(f.pregunta, 120, y);
+    const barX = 120, barW = W - 240, barY = y + 12;
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath(); ctx.roundRect(barX, barY, barW, 14, 7); ctx.fill();
+    ctx.fillStyle = DORADO;
+    ctx.beginPath(); ctx.roundRect(barX, barY, barW * (f.valor_escala / 10), 14, 7); ctx.fill();
+    y += 62;
   }
   ctx.textAlign = 'center';
 
