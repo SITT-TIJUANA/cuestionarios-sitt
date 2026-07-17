@@ -37,9 +37,8 @@ router.put('/:id', async (req, res) => {
   res.json(c);
 });
 
-// Activar uno desactiva automáticamente los demás (uno solo activo a la vez)
+// Cada cuestionario tiene su propio QR/enlace, así que varios pueden estar activos a la vez
 router.put('/:id/activar', async (req, res) => {
-  await sql`UPDATE cuestionarios SET activo = false`;
   const [c] = await sql`UPDATE cuestionarios SET activo = true WHERE id = ${req.params.id} RETURNING *`;
   res.json(c);
 });

@@ -19,6 +19,7 @@ async function peticion(path, opciones = {}) {
 export const api = {
   // público
   cuestionarioActivo: () => peticion('/api/cuestionarios/activo'),
+  cuestionarioPorId: (id) => peticion(`/api/cuestionarios/${id}`),
   crearSesion: (cuestionario_id) => peticion('/api/sesiones', { method: 'POST', body: JSON.stringify({ cuestionario_id }) }),
   guardarRespuesta: (data) => peticion('/api/respuestas', { method: 'POST', body: JSON.stringify(data) }),
   completarSesion: (token) => peticion(`/api/sesiones/${token}/completar`, { method: 'POST' }),

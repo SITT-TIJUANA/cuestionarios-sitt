@@ -2,11 +2,23 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../lib/api';
 
+function enlaceDe(id) {
+  return `${window.location.origin}${import.meta.env.BASE_URL}?c=${id}`;
+}
+
 export default function Dashboard() {
   const [cuestionarios, setCuestionarios] = useState([]);
   const [nuevo, setNuevo] = useState(false);
+  const [verQr, setVerQr] = useState(null);
+  const [copiado, setCopiado] = useState(null);
   const [form, setForm] = useState({ titulo: '', descripcion: '', tipo: 'opcion_multiple', tiempo_estimado_min: 3 });
   const navigate = useNavigate();
+
+  function copiarEnlace(id) {
+    navigator.clipboard.writeText(enlaceDe(id));
+    setCopiado(id);
+    setTimeout(() => setCopiado(null), 1500);
+  }
 
   function cargar() { api.listarCuestionarios().then(setCuestionarios); }
   useEffect(cargar, []);
@@ -52,24 +64,50 @@ export default function Dashboard() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {cuestionarios.map((c) => (
-          <div key={c.id} className="tarjeta" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <strong>{c.titulo}</strong>
-                {c.activo && <span style={{ fontSize: 11, background: '#E1F5EE', color: 'var(--success)', padding: '2px 8px', borderRadius: 20 }}>Activo</span>}
+          <div key={c.id} className="tarjeta">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <strong>{c.titulo}</strong>
+                  {c.activo && <span style={{ fontSize: 11, background: '#E1F5EE', color: 'var(--success)', padding: '2px 8px', borderRadius: 20 }}>Activo</span>}
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0' }}>
+                  {c.total_preguntas} preguntas · {c.total_respuestas} respuestas
+                </p>
               </div>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                {c.total_preguntas} preguntas · {c.total_respuestas} respuestas
-              </p>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                <Link to={`/admin/cuestionarios/${c.id}`} style={{ fontSize: 13, color: 'var(--guinda)' }}>Editar</Link>
+                <Link to={`/admin/cuestionarios/${c.id}/estadisticas`} style={{ fontSize: 13, color: 'var(--guinda)' }}>Estadísticas</Link>
+                <button onClick={() => setVerQr(verQr === c.id ? null : c.id)} style={{ fontSize: 13, background: 'none', border: 'none', color: 'var(--teal)' }}>
+                  {verQr === c.id ? 'Ocultar QR' : 'Ver QR'}
+                </button>
+                {c.activo
+                  ? <button onClick={() => desactivar(c.id)} style={{ fontSize: 13, background: 'none', border: 'none', color: 'var(--text-muted)' }}>Desactivar</button>
+                  : <button onClick={() => activar(c.id)} style={{ fontSize: 13, background: 'none', border: 'none', color: 'var(--teal)' }}>Activar</button>}
+                <button onClick={() => eliminar(c.id)} style={{ fontSize: 13, background: 'none', border: 'none', color: 'var(--danger)' }}>Eliminar</button>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <Link to={`/admin/cuestionarios/${c.id}`} style={{ fontSize: 13, color: 'var(--guinda)' }}>Editar</Link>
-              <Link to={`/admin/cuestionarios/${c.id}/estadisticas`} style={{ fontSize: 13, color: 'var(--guinda)' }}>Estadísticas</Link>
-              {c.activo
-                ? <button onClick={() => desactivar(c.id)} style={{ fontSize: 13, background: 'none', border: 'none', color: 'var(--text-muted)' }}>Desactivar</button>
-                : <button onClick={() => activar(c.id)} style={{ fontSize: 13, background: 'none', border: 'none', color: 'var(--teal)' }}>Activar</button>}
-              <button onClick={() => eliminar(c.id)} style={{ fontSize: 13, background: 'none', border: 'none', color: 'var(--danger)' }}>Eliminar</button>
-            </div>
+
+            {verQr === c.id && (
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(enlaceDe(c.id))}`}
+                  alt={`Código QR de ${c.titulo}`}
+                  width={160} height={160}
+                  style={{ borderRadius: 8, border: '1px solid var(--border)' }}
+                />
+                <div style={{ flex: 1, minWidth: 180 }}>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 6px' }}>Enlace directo a este cuestionario</p>
+                  <p style={{ fontSize: 13, wordBreak: 'break-all', background: 'var(--cream)', padding: 8, borderRadius: 8, margin: '0 0 8px' }}>
+                    {enlaceDe(c.id)}
+                  </p>
+                  <button className="boton-secundario" style={{ width: 'auto', padding: '6px 14px', fontSize: 13 }} onClick={() => copiarEnlace(c.id)}>
+                    {copiado === c.id ? 'Copiado ✓' : 'Copiar enlace'}
+                  </button>
+                  {!c.activo && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 8 }}>Este cuestionario está desactivado — actívalo para que el QR funcione.</p>}
+                </div>
+              </div>
+            )}
           </div>
         ))}
         {cuestionarios.length === 0 && <p style={{ color: 'var(--text-muted)' }}>Aún no hay cuestionarios. Crea el primero.</p>}

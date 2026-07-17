@@ -41,6 +41,42 @@ router.get('/cuestionarios/activo', async (req, res) => {
   }
 });
 
+// Obtener un cuestionario específico por ID (para acceso directo vía QR/enlace)
+router.get('/cuestionarios/:id', async (req, res) => {
+  try {
+    const [cuestionario] = await sql`
+      SELECT id, titulo, descripcion, tipo, tiempo_estimado_min, activo
+      FROM cuestionarios WHERE id = ${req.params.id}
+    `;
+    if (!cuestionario) return res.status(404).json({ error: 'Cuestionario no encontrado' });
+    if (!cuestionario.activo) return res.status(404).json({ error: 'Este cuestionario no está activo por ahora' });
+
+    const preguntas = await sql`
+      SELECT id, texto, imagen_url, orden
+      FROM preguntas WHERE cuestionario_id = ${cuestionario.id}
+      ORDER BY orden ASC
+    `;
+
+    if (cuestionario.tipo === 'opcion_multiple') {
+      const opciones = await sql`
+        SELECT o.id, o.pregunta_id, o.letra, o.texto, o.orden
+        FROM opciones o
+        JOIN preguntas p ON p.id = o.pregunta_id
+        WHERE p.cuestionario_id = ${cuestionario.id}
+        ORDER BY o.orden ASC
+      `;
+      for (const p of preguntas) {
+        p.opciones = opciones.filter(o => o.pregunta_id === p.id);
+      }
+    }
+
+    res.json({ ...cuestionario, preguntas });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al cargar el cuestionario' });
+  }
+});
+
 // Crear una sesión anónima nueva al escanear el QR / entrar
 router.post('/sesiones', async (req, res) => {
   try {

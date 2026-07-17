@@ -9,7 +9,9 @@ export default function Bienvenida() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.cuestionarioActivo()
+    const idParam = new URLSearchParams(window.location.search).get('c');
+    const promesa = idParam ? api.cuestionarioPorId(idParam) : api.cuestionarioActivo();
+    promesa
       .then(setCuestionario)
       .catch((e) => setError(e.message))
       .finally(() => setCargando(false));
