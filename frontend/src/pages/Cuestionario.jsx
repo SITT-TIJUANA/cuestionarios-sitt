@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-import Marca from '../components/Marca';
+import CheckUiverse from '../components/CheckUiverse';
 import BotonSitt from '../components/BotonSitt';
 
 export default function Cuestionario() {
@@ -11,11 +11,6 @@ export default function Cuestionario() {
   const [enviando, setEnviando] = useState(false);
   const navigate = useNavigate();
   const token = sessionStorage.getItem('sesion_token');
-
-  const variantes = useMemo(
-    () => (cuestionario ? cuestionario.preguntas.map(() => Math.floor(Math.random() * 3)) : []),
-    [cuestionario]
-  );
 
   useEffect(() => {
     if (!cuestionario || !token) navigate('/');
@@ -79,7 +74,7 @@ export default function Cuestionario() {
                 background: valorActual === op.id ? '#FAF1EC' : 'white'
               }}
             >
-              <Marca variante={variantes[indice]} activa={valorActual === op.id} />
+              <CheckUiverse activa={valorActual === op.id} />
               <span>{op.texto}</span>
             </button>
           ))}
