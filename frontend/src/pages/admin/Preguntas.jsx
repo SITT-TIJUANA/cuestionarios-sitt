@@ -8,7 +8,7 @@ const opcionesVacias = () => ([
   { letra: 'C', texto: '', es_correcta: false }
 ]);
 
-const vacio = { tipo: 'opcion_multiple', texto: '', antes: '', despues: '', opciones: opcionesVacias() };
+const vacio = { tipo: 'opcion_multiple', texto: '', antes: '', despues: '', respuesta_correcta: '', opciones: opcionesVacias() };
 
 function dividirEnBlanco(texto) {
   const partes = (texto || '').split(/_{3,}/);
@@ -47,6 +47,7 @@ export default function Preguntas() {
       tipo: p.tipo,
       texto: p.texto,
       antes, despues,
+      respuesta_correcta: p.respuesta_correcta || '',
       opciones: p.tipo === 'opcion_multiple' && p.opciones.length
         ? p.opciones.map((o) => ({ letra: o.letra, texto: o.texto, es_correcta: o.es_correcta }))
         : opcionesVacias()
@@ -67,6 +68,7 @@ export default function Preguntas() {
     const texto = form.tipo === 'completar' ? `${form.antes.trim()} ___ ${form.despues.trim()}`.trim() : form.texto;
     fd.append('texto', texto);
     fd.append('orden', preguntas.length);
+    fd.append('respuesta_correcta', form.respuesta_correcta || '');
     if (form.tipo === 'opcion_multiple') fd.append('opciones', JSON.stringify(form.opciones));
     if (imagen) fd.append('imagen', imagen);
 
@@ -149,10 +151,33 @@ export default function Preguntas() {
             </div>
           ))}
           {form.tipo === 'escala' && (
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>El empleado va a deslizar del 1 al 10 para responder — no necesita opciones.</p>
+            <>
+              <label style={{ fontSize: 12, color: 'var(--text-muted)' }}>Calificación mínima para considerarse correcta (opcional)</label>
+              <input type="number" min="1" max="10" placeholder="Ej. 7 (dejar vacío si no aplica calificar)"
+                value={form.respuesta_correcta}
+                onChange={(e) => setForm({ ...form, respuesta_correcta: e.target.value })}
+                style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)' }} />
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>El empleado va a deslizar del 1 al 10 para responder — no necesita opciones.</p>
+            </>
           )}
           {form.tipo === 'libre' && (
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>El empleado va a escribir su respuesta en un cuadro de texto abierto.</p>
+            <>
+              <label style={{ fontSize: 12, color: 'var(--text-muted)' }}>Respuesta esperada (opcional, para calificar)</label>
+              <input placeholder="Dejar vacío si es una reflexión abierta sin respuesta única"
+                value={form.respuesta_correcta}
+                onChange={(e) => setForm({ ...form, respuesta_correcta: e.target.value })}
+                style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)' }} />
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>El empleado va a escribir su respuesta en un cuadro de texto abierto.</p>
+            </>
+          )}
+          {form.tipo === 'completar' && (
+            <>
+              <label style={{ fontSize: 12, color: 'var(--text-muted)' }}>Palabra o frase correcta esperada (opcional, para calificar)</label>
+              <input placeholder="Ej. honestidad"
+                value={form.respuesta_correcta}
+                onChange={(e) => setForm({ ...form, respuesta_correcta: e.target.value })}
+                style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)' }} />
+            </>
           )}
 
           <div style={{ display: 'flex', gap: 8 }}>

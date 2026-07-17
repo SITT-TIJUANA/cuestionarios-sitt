@@ -6,6 +6,7 @@ import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import Preguntas from './pages/admin/Preguntas';
 import Estadisticas from './pages/admin/Estadisticas';
+import Reportes from './pages/admin/Reportes';
 import RutaProtegida from './components/RutaProtegida';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/admin" element={<RutaProtegida><Dashboard /></RutaProtegida>} />
         <Route path="/admin/cuestionarios/:id" element={<RutaProtegida><Preguntas /></RutaProtegida>} />
         <Route path="/admin/cuestionarios/:id/estadisticas" element={<RutaProtegida><Estadisticas /></RutaProtegida>} />
+        <Route path="/admin/cuestionarios/:id/reportes" element={<RutaProtegida><Reportes /></RutaProtegida>} />
       </Routes>
     </BrowserRouter>
   );

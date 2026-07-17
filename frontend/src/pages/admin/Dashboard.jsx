@@ -73,6 +73,7 @@ export default function Dashboard() {
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 <Link to={`/admin/cuestionarios/${c.id}`} style={{ fontSize: 13, color: 'var(--guinda)' }}>Editar</Link>
                 <Link to={`/admin/cuestionarios/${c.id}/estadisticas`} style={{ fontSize: 13, color: 'var(--guinda)' }}>Estadísticas</Link>
+                <Link to={`/admin/cuestionarios/${c.id}/reportes`} style={{ fontSize: 13, color: 'var(--guinda)' }}>Reportes</Link>
                 <button onClick={() => setVerQr(verQr === c.id ? null : c.id)} style={{ fontSize: 13, background: 'none', border: 'none', color: 'var(--teal)' }}>
                   {verQr === c.id ? 'Ocultar QR' : 'Ver QR'}
                 </button>

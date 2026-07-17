@@ -34,8 +34,8 @@ router.post('/', upload.single('imagen'), async (req, res) => {
     }
 
     const [pregunta] = await sql`
-      INSERT INTO preguntas (cuestionario_id, tipo, texto, imagen_url, imagen_public_id, orden)
-      VALUES (${cuestionario_id}, ${tipo}, ${texto}, ${imagen_url}, ${imagen_public_id}, ${orden || 0})
+      INSERT INTO preguntas (cuestionario_id, tipo, texto, imagen_url, imagen_public_id, orden, respuesta_correcta)
+      VALUES (${cuestionario_id}, ${tipo}, ${texto}, ${imagen_url}, ${imagen_public_id}, ${orden || 0}, ${req.body.respuesta_correcta || null})
       RETURNING *
     `;
 
@@ -73,7 +73,8 @@ router.put('/:id', upload.single('imagen'), async (req, res) => {
 
     const [pregunta] = await sql`
       UPDATE preguntas SET texto = ${texto}, orden = ${orden ?? actual.orden}, tipo = ${tipo},
-        imagen_url = ${imagen_url}, imagen_public_id = ${imagen_public_id}
+        imagen_url = ${imagen_url}, imagen_public_id = ${imagen_public_id},
+        respuesta_correcta = ${req.body.respuesta_correcta ?? actual.respuesta_correcta}
       WHERE id = ${req.params.id} RETURNING *
     `;
 

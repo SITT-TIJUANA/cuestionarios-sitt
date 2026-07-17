@@ -55,7 +55,7 @@ export default function Bienvenida() {
       <FondoXiuhcoatl />
       <div
         style={{
-          minHeight: '100dvh', width: '100%', maxWidth: 480, margin: '0 auto',
+          minHeight: '100svh', width: '100%', maxWidth: 480, margin: '0 auto',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between',
           textAlign: 'center', boxSizing: 'border-box',
           padding: 'clamp(24px, 6vh, 48px) clamp(20px, 6vw, 36px)',
@@ -88,19 +88,19 @@ export default function Bienvenida() {
         </div>
 
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(22px, 5vh, 36px)' }}>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'nowrap', justifyContent: 'center', width: '100%' }}>
             {[
               { icono: Clock, texto: `${cuestionario.tiempo_estimado_min} min` },
               { icono: EyeOff, texto: 'Anónimo' },
-              { icono: FileCheck2, texto: 'Reporte al final' }
+              { icono: FileCheck2, texto: 'Reporte' }
             ].map(({ icono: Icono, texto }, i) => (
               <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 7,
+                display: 'flex', alignItems: 'center', gap: 6,
                 background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(192,162,82,0.4)',
-                borderRadius: 999, padding: '9px 16px'
+                borderRadius: 999, padding: 'clamp(7px, 2vw, 9px) clamp(10px, 3vw, 16px)', flexShrink: 0
               }}>
-                <Icono size={16} color="var(--dorado)" strokeWidth={2.2} />
-                <span style={{ fontSize: 13, color: 'white', fontWeight: 500 }}>{texto}</span>
+                <Icono size={15} color="var(--dorado)" strokeWidth={2.2} style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: 'clamp(11px, 3vw, 13px)', color: 'white', fontWeight: 500, whiteSpace: 'nowrap' }}>{texto}</span>
               </div>
             ))}
           </div>

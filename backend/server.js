@@ -8,6 +8,7 @@ import adminAuth from './routes/adminAuth.js';
 import adminCuestionarios from './routes/adminCuestionarios.js';
 import adminPreguntas from './routes/adminPreguntas.js';
 import adminEstadisticas from './routes/adminEstadisticas.js';
+import adminReportes from './routes/adminReportes.js';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/api/admin', adminAuth);
 app.use('/api/admin/cuestionarios', adminCuestionarios);
 app.use('/api/admin/preguntas', adminPreguntas);
 app.use('/api/admin/estadisticas', adminEstadisticas);
+app.use('/api/admin/reportes', adminReportes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`API corriendo en puerto ${PORT}`));

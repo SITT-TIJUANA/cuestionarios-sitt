@@ -49,4 +49,20 @@ export const api = {
   },
   detalleSesion: (sesionId) => peticion(`/api/admin/estadisticas/sesiones/detalle/${sesionId}`),
   urlExportar: (cuestionarioId) => `${API_URL}/api/admin/estadisticas/exportar/${cuestionarioId}`,
+
+  reporteIndividual: (sesionId) => peticion(`/api/admin/reportes/individual/${sesionId}`),
+  reporteIndividualPdf: (sesionId) => peticion(`/api/admin/reportes/individual/${sesionId}/pdf`),
+  reporteGrupal: (cuestionarioId) => peticion(`/api/admin/reportes/grupal/${cuestionarioId}`),
+  reporteGrupalPdf: (cuestionarioId) => peticion(`/api/admin/reportes/grupal/${cuestionarioId}/pdf`),
 };
+
+export function descargarBlob(blob, nombreArchivo) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nombreArchivo;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
