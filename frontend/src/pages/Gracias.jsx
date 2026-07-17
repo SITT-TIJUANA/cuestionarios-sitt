@@ -8,28 +8,19 @@ import { generarImagenCertificado } from '../lib/generarCertificado';
 export default function Gracias() {
   const token = sessionStorage.getItem('sesion_token');
   const navigate = useNavigate();
-  const [descargando, setDescargando] = useState(false);
+  const [generando, setGenerando] = useState(false);
   const [vistaPrevia, setVistaPrevia] = useState(null);
 
-  async function descargarReporte() {
-    setDescargando(true);
+  async function generarReporte() {
+    setGenerando(true);
     try {
       const datos = await api.datosReporte(token);
       const blob = await generarImagenCertificado(datos);
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'reconocimiento-etica.png';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      setVistaPrevia(url);
+      setVistaPrevia(URL.createObjectURL(blob));
     } catch {
       alert('No se pudo generar la imagen. Intenta de nuevo.');
     } finally {
-      setDescargando(false);
+      setGenerando(false);
     }
   }
 
@@ -53,17 +44,27 @@ export default function Gracias() {
       <>
         <FondoGuinda />
         <div className="contenedor" style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <p style={{ fontSize: 13, color: 'var(--crema)', marginBottom: 14, textAlign: 'center' }}>
-            Ya se descargó a tu celular — aquí tienes una vista previa:
+          <p style={{ fontSize: 13, color: 'var(--crema)', marginBottom: 14, textAlign: 'center', lineHeight: 1.6 }}>
+            Mantén presionada la imagen y elige <strong>"Guardar imagen"</strong> para llevártela a tu galería.
           </p>
           <img
             src={vistaPrevia}
-            alt="Vista previa de tu reconocimiento"
+            alt="Tu reconocimiento de participación"
             style={{ width: '100%', borderRadius: 16, border: '1px solid rgba(255,255,255,0.15)', marginBottom: 20 }}
           />
-          <button className="boton-secundario" style={{ borderColor: 'var(--crema)', color: 'var(--crema)' }} onClick={cerrarVistaPrevia}>
-            Cerrar vista previa
-          </button>
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <a
+              href={vistaPrevia}
+              download="reconocimiento-etica.png"
+              className="boton-uiverse"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+            >
+              Guardar imagen
+            </a>
+            <button className="boton-secundario" style={{ borderColor: 'var(--crema)', color: 'var(--crema)' }} onClick={cerrarVistaPrevia}>
+              Cerrar vista previa
+            </button>
+          </div>
         </div>
       </>
     );
@@ -89,8 +90,8 @@ export default function Gracias() {
         </p>
 
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <BotonSitt onClick={descargarReporte} disabled={descargando}>
-            {descargando ? 'Generando…' : 'Descargar mi reporte'}
+          <BotonSitt onClick={generarReporte} disabled={generando}>
+            {generando ? 'Generando…' : 'Descargar mi reporte'}
           </BotonSitt>
           <button className="boton-secundario" style={{ borderColor: 'var(--crema)', color: 'var(--crema)' }} onClick={volverAlInicio}>
             Volver al inicio

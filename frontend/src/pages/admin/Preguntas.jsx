@@ -8,7 +8,12 @@ const opcionesVacias = () => ([
   { letra: 'C', texto: '', es_correcta: false }
 ]);
 
-const vacio = { tipo: 'opcion_multiple', texto: '', opciones: opcionesVacias() };
+const vacio = { tipo: 'opcion_multiple', texto: '', antes: '', despues: '', opciones: opcionesVacias() };
+
+function dividirEnBlanco(texto) {
+  const partes = (texto || '').split(/_{3,}/);
+  return partes.length > 1 ? [partes[0].trim(), partes.slice(1).join('___').trim()] : [texto || '', ''];
+}
 
 const ETIQUETAS_TIPO = {
   opcion_multiple: 'Opción múltiple',
@@ -37,9 +42,11 @@ export default function Preguntas() {
     setEditando('nueva');
   }
   function abrirEditar(p) {
+    const [antes, despues] = p.tipo === 'completar' ? dividirEnBlanco(p.texto) : ['', ''];
     setForm({
       tipo: p.tipo,
       texto: p.texto,
+      antes, despues,
       opciones: p.tipo === 'opcion_multiple' && p.opciones.length
         ? p.opciones.map((o) => ({ letra: o.letra, texto: o.texto, es_correcta: o.es_correcta }))
         : opcionesVacias()
@@ -57,7 +64,8 @@ export default function Preguntas() {
     const fd = new FormData();
     fd.append('cuestionario_id', id);
     fd.append('tipo', form.tipo);
-    fd.append('texto', form.texto);
+    const texto = form.tipo === 'completar' ? `${form.antes.trim()} ___ ${form.despues.trim()}`.trim() : form.texto;
+    fd.append('texto', texto);
     fd.append('orden', preguntas.length);
     if (form.tipo === 'opcion_multiple') fd.append('opciones', JSON.stringify(form.opciones));
     if (imagen) fd.append('imagen', imagen);
@@ -98,8 +106,27 @@ export default function Preguntas() {
             <option value="completar">Completar la oración (rellenar espacio)</option>
           </select>
 
-          <textarea placeholder="Texto de la pregunta" required value={form.texto} onChange={(e) => setForm({ ...form, texto: e.target.value })}
-            style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)', minHeight: 60 }} />
+          {form.tipo !== 'completar' && (
+            <textarea placeholder="Texto de la pregunta" required value={form.texto} onChange={(e) => setForm({ ...form, texto: e.target.value })}
+              style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)', minHeight: 60 }} />
+          )}
+
+          {form.tipo === 'completar' && (
+            <>
+              <label style={{ fontSize: 12, color: 'var(--text-muted)' }}>Texto antes del espacio en blanco</label>
+              <input placeholder='Ej. "El servidor público debe actuar con"' required value={form.antes}
+                onChange={(e) => setForm({ ...form, antes: e.target.value })}
+                style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)' }} />
+
+              <div style={{ textAlign: 'center', color: 'var(--guinda)', fontWeight: 600, fontSize: 13 }}>▼ aquí va el espacio para llenar ▼</div>
+
+              <label style={{ fontSize: 12, color: 'var(--text-muted)' }}>Texto después del espacio en blanco (puede quedar vacío)</label>
+              <input placeholder='Ej. "en todo momento."' value={form.despues}
+                onChange={(e) => setForm({ ...form, despues: e.target.value })}
+                style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)' }} />
+            </>
+          )}
+
           <input type="file" accept="image/*" onChange={(e) => setImagen(e.target.files[0])} />
 
           {form.tipo === 'opcion_multiple' && form.opciones.map((op, i) => (
@@ -126,12 +153,6 @@ export default function Preguntas() {
           )}
           {form.tipo === 'libre' && (
             <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>El empleado va a escribir su respuesta en un cuadro de texto abierto.</p>
-          )}
-          {form.tipo === 'completar' && (
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
-              Escribe la oración usando <code>___</code> (tres guiones bajos) donde debe ir el espacio en blanco.
-              Ejemplo: "El servidor público debe actuar con ___ en todo momento."
-            </p>
           )}
 
           <div style={{ display: 'flex', gap: 8 }}>

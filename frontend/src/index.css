@@ -222,7 +222,41 @@ button {
   pointer-events: none;
 }
 
-/* ===== Checkbox de selección (Uiverse, código de Jair) ===== */
+/* ===== Slider de escala 1-10 ===== */
+input[type="range"].control-escala {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 20px;
+  background: linear-gradient(to right, var(--guinda) var(--relleno, 50%), var(--border) var(--relleno, 50%));
+  outline: none;
+}
+input[type="range"].control-escala::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--dorado);
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  cursor: pointer;
+}
+input[type="range"].control-escala::-moz-range-thumb {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--dorado);
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  cursor: pointer;
+}
+input[type="range"].control-escala::-moz-range-track {
+  height: 8px;
+  border-radius: 20px;
+  background: transparent;
+}
 .check {
   cursor: pointer;
   position: relative;

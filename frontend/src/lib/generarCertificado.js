@@ -7,6 +7,22 @@ function cargarImagen(src) {
   });
 }
 
+// Rectángulo redondeado dibujado a mano — compatible con TODOS los celulares
+// (ctx.roundRect nativo no existe en muchos Android ni en iPhones con iOS viejo)
+function rectRedondeado(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
 function envolverTexto(ctx, texto, x, y, maxAncho, lineHeight) {
   const palabras = texto.split(' ');
   let linea = '';
@@ -31,7 +47,7 @@ export async function generarImagenCertificado(datos) {
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  const GUINDA = '#64002F', GUINDA_ALT = '#99063F', DORADO = '#C0A252', VERDE = '#006037', CREMA = '#E8D9A8';
+  const GUINDA_ALT = '#99063F', DORADO = '#C0A252', CREMA = '#E8D9A8';
 
   const grad = ctx.createRadialGradient(W / 2, H * 0.25, 60, W / 2, H * 0.25, H);
   grad.addColorStop(0, GUINDA_ALT);
@@ -71,8 +87,7 @@ export async function generarImagenCertificado(datos) {
   let y = 590;
   if (datos.total > 0) {
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
-    ctx.beginPath();
-    ctx.roundRect(W / 2 - 160, y, 320, 150, 20);
+    rectRedondeado(ctx, W / 2 - 160, y, 320, 150, 20);
     ctx.fill();
     ctx.fillStyle = DORADO;
     ctx.font = '700 64px Poppins, sans-serif';
@@ -85,14 +100,17 @@ export async function generarImagenCertificado(datos) {
     y += 20;
   }
 
-  // Franja decorativa dorada con el motivo Xiuhcóatl, para llenar el espacio con estilo
+  // Franja decorativa dorada con el motivo Xiuhcóatl (6 repeticiones, parejo en todo el ancho)
   if (serpiente) {
-    const altoIcono = 34, anchoIcono = altoIcono * (serpiente.width / serpiente.height);
-    ctx.globalAlpha = 0.55;
-    let ix = W / 2 - (anchoIcono * 3 + 60);
-    for (let i = 0; i < 3; i++) {
+    const altoIcono = 32, anchoIcono = altoIcono * (serpiente.width / serpiente.height);
+    const cantidad = 6;
+    const espacio = 22;
+    const anchoTotal = cantidad * anchoIcono + (cantidad - 1) * espacio;
+    ctx.globalAlpha = 0.5;
+    let ix = W / 2 - anchoTotal / 2;
+    for (let i = 0; i < cantidad; i++) {
       ctx.drawImage(serpiente, ix, y, anchoIcono, altoIcono);
-      ix += anchoIcono + 30;
+      ix += anchoIcono + espacio;
     }
     ctx.globalAlpha = 1;
     y += altoIcono + 30;
@@ -101,21 +119,37 @@ export async function generarImagenCertificado(datos) {
   ctx.font = '500 22px Inter, sans-serif';
   ctx.fillStyle = 'white';
   y = envolverTexto(ctx, 'Gracias por tu compromiso con la ética pública en Tijuana.', W / 2, y, W - 260, 30);
-  y += 24;
+  y += 30;
 
-  ctx.font = '600 22px Inter, sans-serif';
-  ctx.textAlign = 'left';
-  for (const f of datos.filas.filter(f => f.tipo === 'escala').slice(0, 6)) {
-    ctx.fillStyle = 'white';
-    ctx.fillText(f.pregunta, 120, y);
-    const barX = 120, barW = W - 240, barY = y + 12;
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.beginPath(); ctx.roundRect(barX, barY, barW, 14, 7); ctx.fill();
-    ctx.fillStyle = DORADO;
-    ctx.beginPath(); ctx.roundRect(barX, barY, barW * (f.valor_escala / 10), 14, 7); ctx.fill();
-    y += 62;
-  }
-  ctx.textAlign = 'center';
+  const FRASES = [
+    'Personas como tú son las que construyen, todos los días, un mejor gobierno para Tijuana.',
+    'Tu honestidad y tu ejemplo hacen la diferencia en cada trámite, cada decisión, cada día de servicio.',
+    'Gracias por elegir hacer lo correcto, incluso cuando nadie te está mirando. Eso es integridad.',
+    'El SITT es mejor porque tú eres parte de él. Gracias por tu compromiso.'
+  ];
+  const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  rectRedondeado(ctx, 90, y, W - 180, 190, 20);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(192,162,82,0.5)';
+  ctx.lineWidth = 1;
+  rectRedondeado(ctx, 90, y, W - 180, 190, 20);
+  ctx.stroke();
+
+  ctx.font = '700 40px Poppins, sans-serif';
+  ctx.fillStyle = DORADO;
+  ctx.fillText('"', W / 2, y + 55);
+
+  ctx.font = '500 23px Inter, sans-serif';
+  ctx.fillStyle = 'white';
+  envolverTexto(ctx, frase, W / 2, y + 90, W - 260, 32);
+
+  ctx.font = '600 16px Inter, sans-serif';
+  ctx.fillStyle = DORADO;
+  ctx.fillText('— Equipo SITT Tijuana', W / 2, y + 165);
+
+  y += 230;
 
   ctx.strokeStyle = DORADO;
   ctx.lineWidth = 1.5;

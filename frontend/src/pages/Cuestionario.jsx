@@ -97,10 +97,11 @@ export default function Cuestionario() {
       {pregunta.tipo === 'escala' && (
         <div style={{ padding: '20px 4px' }}>
           <input
+            className="control-escala"
             type="range" min="1" max="10" step="1"
             value={valorActual || 5}
             onChange={(e) => elegir(Number(e.target.value))}
-            style={{ width: '100%' }}
+            style={{ '--relleno': `${(((valorActual || 5) - 1) / 9) * 100}%` }}
           />
           <div style={{ textAlign: 'center', fontSize: 28, fontWeight: 600, color: 'var(--guinda)', marginTop: 12 }}>
             {valorActual || 5}
