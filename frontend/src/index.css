@@ -1,13 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
 :root {
-  --guinda: #7B1D1D;
-  --guinda-dark: #5A1515;
-  --gold: #C9A84C;
-  --ink: #2B2118;
+  --guinda: #64002F;
+  --guinda-alt: #99063F;
+  --verde-oscuro: #003620;
+  --verde: #006037;
+  --dorado: #C0A252;
+  --negro: #1A1A1A;
+  --crema: #E8D9A8;
+
   --cream: #FBF9F6;
   --card: #FFFFFF;
   --border: #E5E0D6;
   --text-muted: #8A8478;
-  --teal: #1F6F64;
   --success: #0F6E56;
   --danger: #993C1D;
 }
@@ -18,11 +23,11 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   background: var(--cream);
-  color: var(--ink);
+  color: var(--negro);
 }
 
 h1, h2, .voz {
-  font-family: 'Fraunces', serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 button {
@@ -39,17 +44,28 @@ button {
   padding: 24px 20px;
 }
 
-.boton-primario {
+/* Botón institucional (estilo "sello" con sombra dura) */
+.boton-sitt {
+  position: relative;
   width: 100%;
   padding: 15px;
   background: var(--guinda);
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 30px;
+  font-family: 'Poppins', sans-serif;
   font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 6px 6px 0px var(--negro);
+  transition: all 0.2s ease;
+  overflow: hidden;
 }
-.boton-primario:disabled { opacity: 0.4; }
+.boton-sitt:active {
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0px var(--negro);
+}
+.boton-sitt:disabled { opacity: 0.4; }
 
 .boton-secundario {
   width: 100%;
@@ -57,7 +73,7 @@ button {
   background: transparent;
   color: var(--guinda);
   border: 1.5px solid var(--guinda);
-  border-radius: 12px;
+  border-radius: 30px;
   font-size: 15px;
   font-weight: 600;
 }
@@ -77,6 +93,76 @@ button {
 }
 .barra-progreso-relleno {
   height: 100%;
-  background: var(--gold);
+  background: var(--dorado);
   transition: width 0.3s ease;
 }
+
+/* ===== Fondo animado con el motivo Xiuhcóatl ===== */
+.fondo-xiuhcoatl {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, var(--verde-oscuro), var(--negro));
+  overflow: hidden;
+  z-index: -1;
+}
+.franja-serpiente {
+  position: absolute;
+  left: 0;
+  width: 300%;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  opacity: 0.16;
+  animation: deslizar 34s linear infinite;
+}
+.franja-serpiente img {
+  height: 70px;
+  margin-right: 40px;
+}
+.franja-serpiente.reversa {
+  animation-direction: reverse;
+  opacity: 0.10;
+}
+@keyframes deslizar {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.333%); }
+}
+
+/* ===== Escudo con profundidad (tilt) ===== */
+.escudo-tilt {
+  width: 92px;
+  transition: transform 0.15s ease-out;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
+}
+
+/* ===== Checkmarks de selección (3 variantes, aleatorias) ===== */
+.marca {
+  --tam: 26px;
+  position: relative;
+  width: var(--tam);
+  height: var(--tam);
+  min-width: var(--tam);
+  flex-shrink: 0;
+}
+.marca svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.marca-circulo {
+  fill: white;
+  stroke: var(--guinda);
+  transition: fill 0.3s, stroke 0.3s;
+}
+.marca-check {
+  stroke: white;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  transition: stroke-dashoffset 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.marca.activa .marca-circulo { fill: var(--verde); stroke: var(--verde); }
+.marca.activa .marca-check { stroke-dashoffset: 0; }

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import Marca from '../components/Marca';
 
 export default function Cuestionario() {
   const [cuestionario] = useState(() => JSON.parse(sessionStorage.getItem('cuestionario') || 'null'));
@@ -9,6 +10,11 @@ export default function Cuestionario() {
   const [enviando, setEnviando] = useState(false);
   const navigate = useNavigate();
   const token = sessionStorage.getItem('sesion_token');
+
+  const variantes = useMemo(
+    () => (cuestionario ? cuestionario.preguntas.map(() => Math.floor(Math.random() * 3)) : []),
+    [cuestionario]
+  );
 
   useEffect(() => {
     if (!cuestionario || !token) navigate('/');
@@ -66,12 +72,12 @@ export default function Cuestionario() {
               onClick={() => elegir(op.id)}
               className="tarjeta"
               style={{
-                textAlign: 'left', display: 'flex', gap: 12,
+                textAlign: 'left', display: 'flex', gap: 12, alignItems: 'center',
                 borderColor: valorActual === op.id ? 'var(--guinda)' : 'var(--border)',
                 background: valorActual === op.id ? '#FAF1EC' : 'white'
               }}
             >
-              <span style={{ fontWeight: 600, color: 'var(--guinda)' }}>{op.letra}</span>
+              <Marca variante={variantes[indice]} activa={valorActual === op.id} />
               <span>{op.texto}</span>
             </button>
           ))}
@@ -92,7 +98,7 @@ export default function Cuestionario() {
 
       <div style={{ flex: 1 }} />
       <button
-        className="boton-primario"
+        className="boton-sitt"
         style={{ marginTop: 20 }}
         disabled={cuestionario.tipo === 'opcion_multiple' && !valorActual || enviando}
         onClick={siguiente}
