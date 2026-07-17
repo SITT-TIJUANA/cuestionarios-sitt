@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import FondoXiuhcoatl from '../components/FondoXiuhcoatl';
 import EscudoTilt from '../components/EscudoTilt';
+import BotonSitt from '../components/BotonSitt';
 
 export default function Bienvenida() {
   const [cuestionario, setCuestionario] = useState(null);
@@ -78,7 +79,7 @@ export default function Bienvenida() {
           <span>Reporte al final</span>
         </div>
 
-        <button className="boton-sitt" onClick={comenzar}>Comenzar</button>
+        <BotonSitt onClick={comenzar}>Comenzar</BotonSitt>
         <p style={{ fontSize: 11, color: 'var(--dorado)', marginTop: 20, opacity: 0.8 }}>Ética que transforma Tijuana</p>
       </div>
     </>

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import Marca from '../components/Marca';
+import BotonSitt from '../components/BotonSitt';
 
 export default function Cuestionario() {
   const [cuestionario] = useState(() => JSON.parse(sessionStorage.getItem('cuestionario') || 'null'));
@@ -38,7 +39,8 @@ export default function Cuestionario() {
     if (esUltima) {
       setEnviando(true);
       await api.completarSesion(token);
-      navigate('/gracias');
+      sessionStorage.removeItem('cuestionario');
+      navigate('/gracias', { replace: true });
     } else {
       setIndice((i) => i + 1);
     }
@@ -97,14 +99,14 @@ export default function Cuestionario() {
       )}
 
       <div style={{ flex: 1 }} />
-      <button
-        className="boton-sitt"
-        style={{ marginTop: 20 }}
-        disabled={cuestionario.tipo === 'opcion_multiple' && !valorActual || enviando}
-        onClick={siguiente}
-      >
-        {esUltima ? 'Finalizar' : 'Siguiente'}
-      </button>
+      <div style={{ marginTop: 20 }}>
+        <BotonSitt
+          disabled={cuestionario.tipo === 'opcion_multiple' && !valorActual || enviando}
+          onClick={siguiente}
+        >
+          {esUltima ? 'Finalizar' : 'Siguiente'}
+        </BotonSitt>
+      </div>
     </div>
   );
 }

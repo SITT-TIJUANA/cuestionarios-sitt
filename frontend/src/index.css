@@ -136,33 +136,198 @@ button {
   filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
 }
 
-/* ===== Checkmarks de selección (3 variantes, aleatorias) ===== */
-.marca {
-  --tam: 26px;
+/* ===== Botón institucional con capa giratoria (código de Jair, recoloreado) ===== */
+.Btn {
   position: relative;
-  width: var(--tam);
-  height: var(--tam);
-  min-width: var(--tam);
-  flex-shrink: 0;
-}
-.marca svg {
   width: 100%;
-  height: 100%;
-  fill: none;
-  stroke-width: 3;
+  height: 54px;
+  border: none;
+  background-color: var(--guinda);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 8px 8px 0px var(--negro);
+  transition-duration: .3s;
+}
+.Btn .Layer {
+  width: 60px;
+  position: absolute;
+  left: -30px;
+  transition-duration: .3s;
+  animation: spin 5s linear infinite;
+}
+.Btn:active {
+  transform: translateY(5px);
+  box-shadow: 3px 3px 0px var(--negro);
+  transition-duration: .3s;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.Btn:hover .Layer, .Btn:active .Layer {
+  left: 0%;
+  width: 100%;
+  transition-duration: .3s;
+}
+.Btn .text {
+  color: white;
+  font-weight: 600;
+  font-size: 1.05em;
+  font-family: 'Poppins', sans-serif;
+  position: absolute;
+  z-index: 2;
+  transition-duration: .1s;
+}
+.Btn:hover .text, .Btn:active .text {
+  color: transparent;
+  transition-duration: .3s;
+}
+.Btn:disabled { opacity: 0.4; pointer-events: none; }
+.cls-1 { fill: var(--negro); }
+.cls-2 { fill: var(--guinda); }
+.cls-3 { fill: #fefefe; }
+.cls-4 { fill: var(--guinda-alt); }
+.cls-5 { fill: var(--verde); }
+.cls-6 { fill: #fff; }
+
+/* ===== Variante A: checkbox con dibujo de palomita (código de Jair) ===== */
+.checkbox {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+.checkbox input {
+  cursor: none;
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+.checkmark {
+  --sizer: 28px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  stroke-width: 6;
   stroke-linecap: round;
   stroke-linejoin: round;
+  z-index: 1;
+  border-radius: 999px;
 }
-.marca-circulo {
+.checkmark, .checkmark path {
+  transition: all 0.5s linear 0s, stroke 0.15s, fill 0.15s;
+}
+.checkbox input:checked ~ .checkmark {
+  fill: var(--verde);
+  stroke: white;
+}
+.checkbox input:checked ~ .checkmark path {
+  animation: checked_success 0.8s linear 0s both;
+  stroke-dashoffset: 0;
+}
+.checkbox input:where(:not(:checked)) ~ .checkmark {
   fill: white;
   stroke: var(--guinda);
-  transition: fill 0.3s, stroke 0.3s;
 }
-.marca-check {
-  stroke: white;
-  stroke-dasharray: 20;
-  stroke-dashoffset: 20;
-  transition: stroke-dashoffset 0.35s cubic-bezier(0.16,1,0.3,1);
+.checkbox input:where(:not(:checked)) ~ .checkmark path {
+  stroke-dashoffset: 28;
 }
-.marca.activa .marca-circulo { fill: var(--verde); stroke: var(--verde); }
-.marca.activa .marca-check { stroke-dashoffset: 0; }
+.sizer {
+  width: var(--sizer);
+  min-width: var(--sizer);
+  max-width: var(--sizer);
+  height: var(--sizer);
+  min-height: var(--sizer);
+  max-height: var(--sizer);
+}
+@keyframes checked_success {
+  0% { stroke-dashoffset: 28; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* ===== Variante B: neon-checkbox (código de Jair, recoloreado guinda/verde) ===== */
+.neon-checkbox {
+  --primary: var(--verde);
+  --primary-dark: var(--verde-oscuro);
+  --primary-light: var(--crema);
+  --size: 28px;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.neon-checkbox input { display: none; }
+.neon-checkbox__frame { position: relative; width: 100%; height: 100%; }
+.neon-checkbox__box {
+  position: absolute; inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 4px;
+  border: 2px solid var(--guinda);
+  transition: all 0.4s ease;
+}
+.neon-checkbox__check-container {
+  position: absolute; inset: 2px;
+  display: flex; align-items: center; justify-content: center;
+}
+.neon-checkbox__check {
+  width: 80%; height: 80%;
+  fill: none; stroke: var(--primary);
+  stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 40; stroke-dashoffset: 40;
+  transform-origin: center;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.neon-checkbox__glow {
+  position: absolute; inset: -2px; border-radius: 6px;
+  background: var(--primary); opacity: 0; filter: blur(8px);
+  transform: scale(1.2); transition: all 0.4s ease;
+}
+.neon-checkbox__borders { position: absolute; inset: 0; border-radius: 4px; overflow: hidden; }
+.neon-checkbox__borders span {
+  position: absolute; width: 40px; height: 1px;
+  background: var(--primary); opacity: 0; transition: opacity 0.4s ease;
+}
+.neon-checkbox__borders span:nth-child(1) { top: 0; left: -100%; animation: borderFlow1 2s linear infinite; }
+.neon-checkbox__borders span:nth-child(2) { top: -100%; right: 0; width: 1px; height: 40px; animation: borderFlow2 2s linear infinite; }
+.neon-checkbox__borders span:nth-child(3) { bottom: 0; right: -100%; animation: borderFlow3 2s linear infinite; }
+.neon-checkbox__borders span:nth-child(4) { bottom: -100%; left: 0; width: 1px; height: 40px; animation: borderFlow4 2s linear infinite; }
+.neon-checkbox:hover .neon-checkbox__box { border-color: var(--primary); transform: scale(1.05); }
+.neon-checkbox input:checked ~ .neon-checkbox__frame .neon-checkbox__box { border-color: var(--primary); background: rgba(0, 96, 55, 0.15); }
+.neon-checkbox input:checked ~ .neon-checkbox__frame .neon-checkbox__check { stroke-dashoffset: 0; transform: scale(1.1); }
+.neon-checkbox input:checked ~ .neon-checkbox__frame .neon-checkbox__glow { opacity: 0.25; }
+.neon-checkbox input:checked ~ .neon-checkbox__frame .neon-checkbox__borders span { opacity: 1; }
+@keyframes borderFlow1 { 0% { transform: translateX(0); } 100% { transform: translateX(200%); } }
+@keyframes borderFlow2 { 0% { transform: translateY(0); } 100% { transform: translateY(200%); } }
+@keyframes borderFlow3 { 0% { transform: translateX(0); } 100% { transform: translateX(-200%); } }
+@keyframes borderFlow4 { 0% { transform: translateY(0); } 100% { transform: translateY(-200%); } }
+
+/* ===== Variante C: checkbox-wrapper (código de Jair) ===== */
+.checkbox-wrapper input[type="checkbox"] { visibility: hidden; display: none; }
+.checkbox-wrapper *, .checkbox-wrapper ::after, .checkbox-wrapper ::before {
+  box-sizing: border-box; user-select: none;
+}
+.checkbox-wrapper { position: relative; display: block; overflow: hidden; width: 28px; height: 28px; }
+.checkbox-wrapper .label { cursor: pointer; }
+.checkbox-wrapper .label svg { vertical-align: middle; }
+.checkbox-wrapper .path1 {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  transition: 0.5s stroke-dashoffset;
+  opacity: 1;
+  stroke: var(--guinda);
+}
+.checkbox-wrapper.marcada .path1 {
+  stroke-dashoffset: 0;
+  opacity: 1;
+  stroke: var(--verde);
+}
+.checkbox-wrapper .circulo { fill: white; stroke: var(--guinda); stroke-width: 4; transition: fill 0.3s, stroke 0.3s; }
+.checkbox-wrapper.marcada .circulo { fill: var(--verde); stroke: var(--verde); }
