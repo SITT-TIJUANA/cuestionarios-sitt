@@ -78,6 +78,18 @@ button {
   font-weight: 600;
 }
 
+.boton-primario {
+  width: 100%;
+  padding: 12px;
+  background: var(--guinda);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.boton-primario:disabled { opacity: 0.5; }
+
 .tarjeta {
   background: var(--card);
   border: 1px solid var(--border);

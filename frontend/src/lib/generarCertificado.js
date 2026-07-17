@@ -66,7 +66,7 @@ export async function generarImagenCertificado(datos) {
   envolverTexto(ctx, `Por completar el ${datos.titulo}, reafirmando tu compromiso con los valores del Código de Ética institucional.`, W / 2, 450, W - 220, 30);
 
   let y = 560;
-  if (datos.tipo === 'opcion_multiple') {
+  if (datos.total > 0) {
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
     ctx.beginPath();
     ctx.roundRect(W / 2 - 160, y, 320, 150, 20);
@@ -77,13 +77,16 @@ export async function generarImagenCertificado(datos) {
     ctx.font = '400 20px Inter, sans-serif';
     ctx.fillStyle = 'white';
     ctx.fillText('respuestas alineadas al Código de Ética', W / 2, y + 130);
-  } else {
-    ctx.font = '600 22px Inter, sans-serif';
-    ctx.textAlign = 'left';
-    let by = y;
-    for (const f of datos.filas.slice(0, 8)) {
+    y += 190;
+  }
+
+  ctx.font = '600 22px Inter, sans-serif';
+  ctx.textAlign = 'left';
+  let by = y;
+  for (const f of datos.filas.slice(0, 6)) {
+    if (f.tipo === 'escala') {
       ctx.fillStyle = 'white';
-      ctx.fillText(f.valor, 120, by);
+      ctx.fillText(f.pregunta, 120, by);
       const barX = 120, barW = W - 240, barY = by + 12;
       ctx.fillStyle = 'rgba(255,255,255,0.15)';
       ctx.beginPath(); ctx.roundRect(barX, barY, barW, 14, 7); ctx.fill();
@@ -91,8 +94,8 @@ export async function generarImagenCertificado(datos) {
       ctx.beginPath(); ctx.roundRect(barX, barY, barW * (f.valor_escala / 10), 14, 7); ctx.fill();
       by += 62;
     }
-    ctx.textAlign = 'center';
   }
+  ctx.textAlign = 'center';
 
   ctx.strokeStyle = DORADO;
   ctx.lineWidth = 1.5;

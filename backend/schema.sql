@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS cuestionarios (
   id SERIAL PRIMARY KEY,
   titulo VARCHAR(200) NOT NULL,
   descripcion TEXT,
-  tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('opcion_multiple', 'escala')),
   tiempo_estimado_min INT DEFAULT 3,
   activo BOOLEAN DEFAULT false,
   creado_en TIMESTAMP DEFAULT NOW()
@@ -21,6 +20,7 @@ CREATE TABLE IF NOT EXISTS cuestionarios (
 CREATE TABLE IF NOT EXISTS preguntas (
   id SERIAL PRIMARY KEY,
   cuestionario_id INT NOT NULL REFERENCES cuestionarios(id) ON DELETE CASCADE,
+  tipo VARCHAR(20) NOT NULL DEFAULT 'opcion_multiple' CHECK (tipo IN ('opcion_multiple', 'escala', 'libre')),
   texto TEXT NOT NULL,
   imagen_url TEXT,
   imagen_public_id TEXT,
@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS respuestas (
   pregunta_id INT NOT NULL REFERENCES preguntas(id) ON DELETE CASCADE,
   opcion_id INT REFERENCES opciones(id),
   valor_escala INT CHECK (valor_escala BETWEEN 1 AND 10),
+  texto_respuesta TEXT,
   creado_en TIMESTAMP DEFAULT NOW(),
   UNIQUE(sesion_id, pregunta_id)
 );

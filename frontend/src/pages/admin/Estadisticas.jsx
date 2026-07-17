@@ -11,6 +11,7 @@ export default function Estadisticas() {
   const [resumen, setResumen] = useState(null);
   const [porPregunta, setPorPregunta] = useState([]);
   const [promedios, setPromedios] = useState([]);
+  const [libres, setLibres] = useState([]);
   const [sesiones, setSesiones] = useState([]);
   const [detalle, setDetalle] = useState(null);
 
@@ -19,17 +20,18 @@ export default function Estadisticas() {
     api.sesiones(id).then(setSesiones);
     api.porPregunta(id).then(setPorPregunta).catch(() => {});
     api.promedios(id).then(setPromedios).catch(() => {});
+    api.libres(id).then(setLibres).catch(() => {});
   }, [id]);
 
   if (!resumen) return null;
-  const esEscala = resumen.tipo === 'escala';
 
-  // Agrupar por pregunta para el tipo opción múltiple
   const preguntasAgrupadas = {};
   for (const fila of porPregunta) {
     if (!preguntasAgrupadas[fila.pregunta_id]) preguntasAgrupadas[fila.pregunta_id] = { pregunta: fila.pregunta, filas: [] };
     preguntasAgrupadas[fila.pregunta_id].filas.push(fila);
   }
+
+  const hayContenido = porPregunta.length > 0 || promedios.length > 0 || libres.length > 0;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 20px' }}>
@@ -45,9 +47,9 @@ export default function Estadisticas() {
         <p style={{ fontSize: 32, fontWeight: 600, margin: '4px 0 0', color: 'var(--guinda)' }}>{resumen.total_respuestas}</p>
       </div>
 
-      {esEscala ? (
+      {promedios.length > 0 && (
         <div className="tarjeta" style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 15, marginTop: 0 }}>Promedio por valor</h3>
+          <h3 style={{ fontSize: 15, marginTop: 0 }}>Promedio por valor (escala)</h3>
           <Bar
             data={{
               labels: promedios.map((p) => p.valor),
@@ -56,20 +58,33 @@ export default function Estadisticas() {
             options={{ indexAxis: 'y', scales: { x: { min: 0, max: 10 } }, plugins: { legend: { display: false } } }}
           />
         </div>
-      ) : (
-        Object.values(preguntasAgrupadas).map((p, i) => (
-          <div key={i} className="tarjeta" style={{ marginBottom: 16 }}>
-            <p style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>{p.pregunta}</p>
-            <Bar
-              data={{
-                labels: p.filas.map((f) => f.letra),
-                datasets: [{ label: 'Respuestas', data: p.filas.map((f) => Number(f.total)), backgroundColor: '#7B1D1D' }]
-              }}
-              options={{ plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }}
-            />
-          </div>
-        ))
       )}
+
+      {Object.values(preguntasAgrupadas).map((p, i) => (
+        <div key={i} className="tarjeta" style={{ marginBottom: 16 }}>
+          <p style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>{p.pregunta}</p>
+          <Bar
+            data={{
+              labels: p.filas.map((f) => f.letra),
+              datasets: [{ label: 'Respuestas', data: p.filas.map((f) => Number(f.total)), backgroundColor: '#7B1D1D' }]
+            }}
+            options={{ plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }}
+          />
+        </div>
+      ))}
+
+      {libres.map((p, i) => (
+        <div key={i} className="tarjeta" style={{ marginBottom: 16 }}>
+          <p style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px' }}>{p.pregunta}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 240, overflowY: 'auto' }}>
+            {p.respuestas.map((r, j) => (
+              <p key={j} style={{ fontSize: 13, margin: 0, padding: 8, background: 'var(--cream)', borderRadius: 8 }}>"{r}"</p>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {!hayContenido && <p style={{ color: 'var(--text-muted)' }}>Todavía no hay respuestas para mostrar estadísticas.</p>}
 
       <h3 style={{ fontSize: 15, marginTop: 24 }}>Reportes individuales ({sesiones.length})</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -89,7 +104,7 @@ export default function Estadisticas() {
           </div>
           {detalle.map((f, i) => (
             <p key={i} style={{ fontSize: 13, margin: '8px 0' }}>
-              <strong>{f.pregunta}:</strong> {f.respuesta ?? f.valor_escala}
+              <strong>{f.pregunta}:</strong> {f.respuesta ?? f.valor_escala ?? f.texto_respuesta}
             </p>
           ))}
         </div>

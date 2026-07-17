@@ -24,9 +24,10 @@ export default function Cuestionario() {
 
   async function elegir(valor) {
     setRespuestas((r) => ({ ...r, [pregunta.id]: valor }));
-    const body = cuestionario.tipo === 'opcion_multiple'
-      ? { token, pregunta_id: pregunta.id, opcion_id: valor }
-      : { token, pregunta_id: pregunta.id, valor_escala: valor };
+    let body = { token, pregunta_id: pregunta.id };
+    if (pregunta.tipo === 'opcion_multiple') body.opcion_id = valor;
+    else if (pregunta.tipo === 'escala') body.valor_escala = valor;
+    else body.texto_respuesta = valor;
     api.guardarRespuesta(body).catch(() => {});
   }
 
@@ -40,6 +41,10 @@ export default function Cuestionario() {
       setIndice((i) => i + 1);
     }
   }
+
+  const faltaResponder =
+    (pregunta.tipo === 'opcion_multiple' && !valorActual) ||
+    (pregunta.tipo === 'libre' && !valorActual?.trim());
 
   return (
     <div className="contenedor">
@@ -61,7 +66,7 @@ export default function Cuestionario() {
 
       <h2 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.4, margin: '0 0 20px' }}>{pregunta.texto}</h2>
 
-      {cuestionario.tipo === 'opcion_multiple' ? (
+      {pregunta.tipo === 'opcion_multiple' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {pregunta.opciones.map((op) => (
             <button
@@ -79,7 +84,9 @@ export default function Cuestionario() {
             </button>
           ))}
         </div>
-      ) : (
+      )}
+
+      {pregunta.tipo === 'escala' && (
         <div style={{ padding: '20px 4px' }}>
           <input
             type="range" min="1" max="10" step="1"
@@ -93,12 +100,22 @@ export default function Cuestionario() {
         </div>
       )}
 
+      {pregunta.tipo === 'libre' && (
+        <textarea
+          value={valorActual || ''}
+          onChange={(e) => elegir(e.target.value)}
+          placeholder="Escribe tu respuesta aquí..."
+          rows={5}
+          style={{
+            width: '100%', padding: 14, borderRadius: 14, border: '1px solid var(--border)',
+            fontFamily: 'Inter, sans-serif', fontSize: 15, resize: 'vertical'
+          }}
+        />
+      )}
+
       <div style={{ flex: 1 }} />
       <div style={{ marginTop: 20 }}>
-        <BotonSitt
-          disabled={cuestionario.tipo === 'opcion_multiple' && !valorActual || enviando}
-          onClick={siguiente}
-        >
+        <BotonSitt disabled={faltaResponder || enviando} onClick={siguiente}>
           {esUltima ? 'Finalizar' : 'Siguiente'}
         </BotonSitt>
       </div>

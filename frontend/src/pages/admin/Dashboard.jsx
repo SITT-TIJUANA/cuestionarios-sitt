@@ -11,7 +11,7 @@ export default function Dashboard() {
   const [nuevo, setNuevo] = useState(false);
   const [verQr, setVerQr] = useState(null);
   const [copiado, setCopiado] = useState(null);
-  const [form, setForm] = useState({ titulo: '', descripcion: '', tipo: 'opcion_multiple', tiempo_estimado_min: 3 });
+  const [form, setForm] = useState({ titulo: '', descripcion: '', tiempo_estimado_min: 3 });
   const navigate = useNavigate();
 
   function copiarEnlace(id) {
@@ -53,11 +53,6 @@ export default function Dashboard() {
             style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)' }} />
           <input placeholder="Descripción (opcional)" value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
             style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)' }} />
-          <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-            style={{ padding: 10, borderRadius: 8, border: '1px solid var(--border)' }}>
-            <option value="opcion_multiple">Opción múltiple (como Test de Ética)</option>
-            <option value="escala">Escala 1-10 (como Ética Laboral)</option>
-          </select>
           <button className="boton-primario" type="submit">Crear</button>
         </form>
       )}

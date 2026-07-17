@@ -11,11 +11,10 @@ router.get('/resumen/:cuestionarioId', async (req, res) => {
   const [total] = await sql`
     SELECT COUNT(*) AS total FROM sesiones WHERE cuestionario_id = ${cuestionarioId} AND completado = true
   `;
-  const [cuestionario] = await sql`SELECT tipo FROM cuestionarios WHERE id = ${cuestionarioId}`;
-  res.json({ total_respuestas: Number(total.total), tipo: cuestionario?.tipo });
+  res.json({ total_respuestas: Number(total.total) });
 });
 
-// Por pregunta: % de cada opción elegida (tipo opcion_multiple)
+// Por pregunta: % de cada opción elegida (solo preguntas tipo opcion_multiple)
 router.get('/por-pregunta/:cuestionarioId', async (req, res) => {
   const { cuestionarioId } = req.params;
   const filas = await sql`
@@ -24,14 +23,14 @@ router.get('/por-pregunta/:cuestionarioId', async (req, res) => {
     FROM preguntas p
     LEFT JOIN opciones o ON o.pregunta_id = p.id
     LEFT JOIN respuestas r ON r.opcion_id = o.id
-    WHERE p.cuestionario_id = ${cuestionarioId}
+    WHERE p.cuestionario_id = ${cuestionarioId} AND p.tipo = 'opcion_multiple'
     GROUP BY p.id, p.texto, p.orden, o.letra, o.texto
     ORDER BY p.orden ASC, o.letra ASC
   `;
   res.json(filas);
 });
 
-// Promedio por valor (tipo escala)
+// Promedio por valor (solo preguntas tipo escala)
 router.get('/promedios/:cuestionarioId', async (req, res) => {
   const { cuestionarioId } = req.params;
   const filas = await sql`
@@ -39,11 +38,29 @@ router.get('/promedios/:cuestionarioId', async (req, res) => {
       ROUND(AVG(r.valor_escala)::numeric, 1) AS promedio, COUNT(r.id) AS total
     FROM preguntas p
     LEFT JOIN respuestas r ON r.pregunta_id = p.id
-    WHERE p.cuestionario_id = ${cuestionarioId}
+    WHERE p.cuestionario_id = ${cuestionarioId} AND p.tipo = 'escala'
     GROUP BY p.id, p.texto, p.orden
     ORDER BY p.orden ASC
   `;
   res.json(filas);
+});
+
+// Respuestas de texto libre, agrupadas por pregunta
+router.get('/libres/:cuestionarioId', async (req, res) => {
+  const { cuestionarioId } = req.params;
+  const filas = await sql`
+    SELECT p.id AS pregunta_id, p.texto AS pregunta, p.orden, r.texto_respuesta, r.creado_en
+    FROM preguntas p
+    JOIN respuestas r ON r.pregunta_id = p.id
+    WHERE p.cuestionario_id = ${cuestionarioId} AND p.tipo = 'libre' AND r.texto_respuesta IS NOT NULL
+    ORDER BY p.orden ASC, r.creado_en DESC
+  `;
+  const agrupadas = {};
+  for (const f of filas) {
+    if (!agrupadas[f.pregunta_id]) agrupadas[f.pregunta_id] = { pregunta: f.pregunta, orden: f.orden, respuestas: [] };
+    agrupadas[f.pregunta_id].respuestas.push(f.texto_respuesta);
+  }
+  res.json(Object.values(agrupadas).sort((a, b) => a.orden - b.orden));
 });
 
 // Listado de sesiones individuales (anónimas, con filtro de fecha opcional)
@@ -64,7 +81,7 @@ router.get('/sesiones/:cuestionarioId', async (req, res) => {
 // Detalle de una sesión individual
 router.get('/sesiones/detalle/:sesionId', async (req, res) => {
   const filas = await sql`
-    SELECT p.texto AS pregunta, o.texto AS respuesta, r.valor_escala
+    SELECT p.texto AS pregunta, o.texto AS respuesta, r.valor_escala, r.texto_respuesta
     FROM respuestas r
     JOIN preguntas p ON p.id = r.pregunta_id
     LEFT JOIN opciones o ON o.id = r.opcion_id
@@ -78,7 +95,7 @@ router.get('/sesiones/detalle/:sesionId', async (req, res) => {
 router.get('/exportar/:cuestionarioId', async (req, res) => {
   const filas = await sql`
     SELECT s.id AS sesion, s.completado_en, p.orden, p.texto AS pregunta,
-      COALESCE(o.texto, r.valor_escala::text) AS respuesta
+      COALESCE(o.texto, r.valor_escala::text, r.texto_respuesta) AS respuesta
     FROM respuestas r
     JOIN sesiones s ON s.id = r.sesion_id
     JOIN preguntas p ON p.id = r.pregunta_id

@@ -42,6 +42,7 @@ export const api = {
   resumen: (cuestionarioId) => peticion(`/api/admin/estadisticas/resumen/${cuestionarioId}`),
   porPregunta: (cuestionarioId) => peticion(`/api/admin/estadisticas/por-pregunta/${cuestionarioId}`),
   promedios: (cuestionarioId) => peticion(`/api/admin/estadisticas/promedios/${cuestionarioId}`),
+  libres: (cuestionarioId) => peticion(`/api/admin/estadisticas/libres/${cuestionarioId}`),
   sesiones: (cuestionarioId, filtros = {}) => {
     const qs = new URLSearchParams(filtros).toString();
     return peticion(`/api/admin/estadisticas/sesiones/${cuestionarioId}${qs ? '?' + qs : ''}`);

@@ -7,7 +7,7 @@ const router = Router();
 router.get('/cuestionarios/activo', async (req, res) => {
   try {
     const [cuestionario] = await sql`
-      SELECT id, titulo, descripcion, tipo, tiempo_estimado_min
+      SELECT id, titulo, descripcion, tiempo_estimado_min
       FROM cuestionarios WHERE activo = true
       ORDER BY id DESC LIMIT 1
     `;
@@ -16,22 +16,20 @@ router.get('/cuestionarios/activo', async (req, res) => {
     }
 
     const preguntas = await sql`
-      SELECT id, texto, imagen_url, orden
+      SELECT id, tipo, texto, imagen_url, orden
       FROM preguntas WHERE cuestionario_id = ${cuestionario.id}
       ORDER BY orden ASC
     `;
 
-    if (cuestionario.tipo === 'opcion_multiple') {
-      const opciones = await sql`
-        SELECT o.id, o.pregunta_id, o.letra, o.texto, o.orden
-        FROM opciones o
-        JOIN preguntas p ON p.id = o.pregunta_id
-        WHERE p.cuestionario_id = ${cuestionario.id}
-        ORDER BY o.orden ASC
-      `;
-      for (const p of preguntas) {
-        p.opciones = opciones.filter(o => o.pregunta_id === p.id);
-      }
+    const opciones = await sql`
+      SELECT o.id, o.pregunta_id, o.letra, o.texto, o.orden
+      FROM opciones o
+      JOIN preguntas p ON p.id = o.pregunta_id
+      WHERE p.cuestionario_id = ${cuestionario.id}
+      ORDER BY o.orden ASC
+    `;
+    for (const p of preguntas) {
+      if (p.tipo === 'opcion_multiple') p.opciones = opciones.filter(o => o.pregunta_id === p.id);
     }
 
     res.json({ ...cuestionario, preguntas });
@@ -45,29 +43,27 @@ router.get('/cuestionarios/activo', async (req, res) => {
 router.get('/cuestionarios/:id', async (req, res) => {
   try {
     const [cuestionario] = await sql`
-      SELECT id, titulo, descripcion, tipo, tiempo_estimado_min, activo
+      SELECT id, titulo, descripcion, tiempo_estimado_min, activo
       FROM cuestionarios WHERE id = ${req.params.id}
     `;
     if (!cuestionario) return res.status(404).json({ error: 'Cuestionario no encontrado' });
     if (!cuestionario.activo) return res.status(404).json({ error: 'Este cuestionario no está activo por ahora' });
 
     const preguntas = await sql`
-      SELECT id, texto, imagen_url, orden
+      SELECT id, tipo, texto, imagen_url, orden
       FROM preguntas WHERE cuestionario_id = ${cuestionario.id}
       ORDER BY orden ASC
     `;
 
-    if (cuestionario.tipo === 'opcion_multiple') {
-      const opciones = await sql`
-        SELECT o.id, o.pregunta_id, o.letra, o.texto, o.orden
-        FROM opciones o
-        JOIN preguntas p ON p.id = o.pregunta_id
-        WHERE p.cuestionario_id = ${cuestionario.id}
-        ORDER BY o.orden ASC
-      `;
-      for (const p of preguntas) {
-        p.opciones = opciones.filter(o => o.pregunta_id === p.id);
-      }
+    const opciones = await sql`
+      SELECT o.id, o.pregunta_id, o.letra, o.texto, o.orden
+      FROM opciones o
+      JOIN preguntas p ON p.id = o.pregunta_id
+      WHERE p.cuestionario_id = ${cuestionario.id}
+      ORDER BY o.orden ASC
+    `;
+    for (const p of preguntas) {
+      if (p.tipo === 'opcion_multiple') p.opciones = opciones.filter(o => o.pregunta_id === p.id);
     }
 
     res.json({ ...cuestionario, preguntas });
@@ -97,7 +93,7 @@ router.post('/sesiones', async (req, res) => {
 // Guardar una respuesta (se llama pregunta por pregunta, según avanza)
 router.post('/respuestas', async (req, res) => {
   try {
-    const { token, pregunta_id, opcion_id, valor_escala } = req.body;
+    const { token, pregunta_id, opcion_id, valor_escala, texto_respuesta } = req.body;
     if (!token || !pregunta_id) return res.status(400).json({ error: 'Faltan datos' });
 
     const [sesion] = await sql`SELECT id, completado FROM sesiones WHERE token = ${token}`;
@@ -105,10 +101,10 @@ router.post('/respuestas', async (req, res) => {
     if (sesion.completado) return res.status(400).json({ error: 'Esta sesión ya fue enviada' });
 
     await sql`
-      INSERT INTO respuestas (sesion_id, pregunta_id, opcion_id, valor_escala)
-      VALUES (${sesion.id}, ${pregunta_id}, ${opcion_id || null}, ${valor_escala || null})
+      INSERT INTO respuestas (sesion_id, pregunta_id, opcion_id, valor_escala, texto_respuesta)
+      VALUES (${sesion.id}, ${pregunta_id}, ${opcion_id || null}, ${valor_escala || null}, ${texto_respuesta || null})
       ON CONFLICT (sesion_id, pregunta_id)
-      DO UPDATE SET opcion_id = EXCLUDED.opcion_id, valor_escala = EXCLUDED.valor_escala
+      DO UPDATE SET opcion_id = EXCLUDED.opcion_id, valor_escala = EXCLUDED.valor_escala, texto_respuesta = EXCLUDED.texto_respuesta
     `;
     res.json({ ok: true });
   } catch (err) {

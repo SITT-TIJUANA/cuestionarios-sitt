@@ -18,10 +18,10 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const { titulo, descripcion, tipo, tiempo_estimado_min } = req.body;
+  const { titulo, descripcion, tiempo_estimado_min } = req.body;
   const [c] = await sql`
-    INSERT INTO cuestionarios (titulo, descripcion, tipo, tiempo_estimado_min)
-    VALUES (${titulo}, ${descripcion || null}, ${tipo}, ${tiempo_estimado_min || 3})
+    INSERT INTO cuestionarios (titulo, descripcion, tiempo_estimado_min)
+    VALUES (${titulo}, ${descripcion || null}, ${tiempo_estimado_min || 3})
     RETURNING *
   `;
   res.json(c);

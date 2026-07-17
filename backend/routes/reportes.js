@@ -16,32 +16,26 @@ const VERDE = '#006037';
 
 async function obtenerDatosSesion(token) {
   const [sesion] = await sql`
-    SELECT s.id, s.cuestionario_id, s.completado_en, c.titulo, c.tipo
+    SELECT s.id, s.cuestionario_id, s.completado_en, c.titulo
     FROM sesiones s JOIN cuestionarios c ON c.id = s.cuestionario_id
     WHERE s.token = ${token}
   `;
   if (!sesion) return null;
 
-  if (sesion.tipo === 'opcion_multiple') {
-    const filas = await sql`
-      SELECT p.orden, p.texto AS pregunta, o.letra, o.texto AS respuesta, o.es_correcta
-      FROM respuestas r
-      JOIN preguntas p ON p.id = r.pregunta_id
-      LEFT JOIN opciones o ON o.id = r.opcion_id
-      WHERE r.sesion_id = ${sesion.id}
-      ORDER BY p.orden ASC
-    `;
-    const correctas = filas.filter(f => f.es_correcta).length;
-    return { ...sesion, filas, correctas, total: filas.length };
-  } else {
-    const filas = await sql`
-      SELECT p.texto AS valor, r.valor_escala
-      FROM respuestas r JOIN preguntas p ON p.id = r.pregunta_id
-      WHERE r.sesion_id = ${sesion.id}
-      ORDER BY p.orden ASC
-    `;
-    return { ...sesion, filas };
-  }
+  const filas = await sql`
+    SELECT p.orden, p.tipo, p.texto AS pregunta, o.letra, o.texto AS respuesta,
+      o.es_correcta, r.valor_escala, r.texto_respuesta
+    FROM respuestas r
+    JOIN preguntas p ON p.id = r.pregunta_id
+    LEFT JOIN opciones o ON o.id = r.opcion_id
+    WHERE r.sesion_id = ${sesion.id}
+    ORDER BY p.orden ASC
+  `;
+
+  const deOpcionMultiple = filas.filter(f => f.tipo === 'opcion_multiple');
+  const correctas = deOpcionMultiple.filter(f => f.es_correcta).length;
+
+  return { ...sesion, filas, correctas, total: deOpcionMultiple.length };
 }
 
 // Datos en JSON (para que el frontend genere la imagen del certificado)
@@ -95,37 +89,42 @@ router.get('/reportes/:token', async (req, res) => {
 
     let y = 230;
 
-    if (datos.tipo === 'opcion_multiple') {
-      // Resultado destacado
+    if (datos.total > 0) {
       doc.roundedRect(W / 2 - 90, y, 180, 70, 10).fill('#FAF1EC');
       doc.font('Helvetica-Bold').fontSize(30).fillColor(GUINDA)
         .text(`${datos.correctas}/${datos.total}`, W / 2 - 90, y + 14, { width: 180, align: 'center' });
       doc.font('Helvetica').fontSize(9).fillColor(NEGRO)
         .text('respuestas alineadas al Código de Ética', W / 2 - 85, y + 48, { width: 170, align: 'center' });
       y += 100;
+    }
 
-      doc.font('Helvetica-Bold').fontSize(11).fillColor(GUINDA).text('Detalle de tus respuestas', 60, y);
-      y += 20;
-      for (const f of datos.filas) {
-        doc.font('Helvetica-Bold').fontSize(9.5).fillColor(NEGRO)
-          .text(`${f.orden}. ${f.pregunta}`, 60, y, { width: W - 120 });
-        y = doc.y + 2;
+    doc.font('Helvetica-Bold').fontSize(11).fillColor(GUINDA).text('Detalle de tus respuestas', 60, y);
+    y += 20;
+
+    for (const f of datos.filas) {
+      if (y > H - 150) {
+        doc.addPage();
+        doc.rect(0, 0, W, H).fill('#FBF9F6');
+        doc.rect(18, 18, W - 36, H - 36).lineWidth(1.5).stroke(DORADO);
+        doc.rect(24, 24, W - 48, H - 48).lineWidth(0.75).stroke(GUINDA);
+        y = 50;
+      }
+      doc.font('Helvetica-Bold').fontSize(9.5).fillColor(NEGRO)
+        .text(`${f.orden}. ${f.pregunta}`, 60, y, { width: W - 120 });
+      y = doc.y + 2;
+
+      if (f.tipo === 'opcion_multiple') {
         doc.font('Helvetica').fontSize(9)
           .fillColor(f.es_correcta ? VERDE : GUINDA_ALT)
           .text(`Tu respuesta: ${f.letra}) ${f.respuesta}${f.es_correcta ? '  ·  conducta correcta' : ''}`, 60, y, { width: W - 120 });
-        y = doc.y + 10;
+      } else if (f.tipo === 'escala') {
+        doc.font('Helvetica').fontSize(9).fillColor(NEGRO)
+          .text(`Calificación: ${f.valor_escala}/10`, 60, y, { width: W - 120 });
+      } else {
+        doc.font('Helvetica-Oblique').fontSize(9).fillColor(NEGRO)
+          .text(`"${f.texto_respuesta || '(sin respuesta)'}"`, 60, y, { width: W - 120 });
       }
-    } else {
-      doc.font('Helvetica-Bold').fontSize(11).fillColor(GUINDA).text('Tu autoevaluación', 60, y);
-      y += 24;
-      for (const f of datos.filas) {
-        doc.font('Helvetica').fontSize(10).fillColor(NEGRO).text(f.valor, 60, y);
-        const barX = 300, barW = 220;
-        doc.roundedRect(barX, y, barW, 9, 4).fill('#E5E0D6');
-        doc.roundedRect(barX, y, barW * (f.valor_escala / 10), 9, 4).fill(DORADO);
-        doc.font('Helvetica-Bold').fontSize(9).fillColor(GUINDA).text(`${f.valor_escala}/10`, barX + barW + 10, y - 1);
-        y += 26;
-      }
+      y = doc.y + 10;
     }
 
     // Pie de "firma"

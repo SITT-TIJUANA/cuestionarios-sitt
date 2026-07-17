@@ -23,6 +23,7 @@ router.get('/cuestionario/:cuestionarioId', async (req, res) => {
 router.post('/', upload.single('imagen'), async (req, res) => {
   try {
     const { cuestionario_id, texto, orden } = req.body;
+    const tipo = req.body.tipo || 'opcion_multiple';
     const opciones = req.body.opciones ? JSON.parse(req.body.opciones) : [];
 
     let imagen_url = null, imagen_public_id = null;
@@ -33,16 +34,18 @@ router.post('/', upload.single('imagen'), async (req, res) => {
     }
 
     const [pregunta] = await sql`
-      INSERT INTO preguntas (cuestionario_id, texto, imagen_url, imagen_public_id, orden)
-      VALUES (${cuestionario_id}, ${texto}, ${imagen_url}, ${imagen_public_id}, ${orden || 0})
+      INSERT INTO preguntas (cuestionario_id, tipo, texto, imagen_url, imagen_public_id, orden)
+      VALUES (${cuestionario_id}, ${tipo}, ${texto}, ${imagen_url}, ${imagen_public_id}, ${orden || 0})
       RETURNING *
     `;
 
-    for (const [i, op] of opciones.entries()) {
-      await sql`
-        INSERT INTO opciones (pregunta_id, letra, texto, es_correcta, orden)
-        VALUES (${pregunta.id}, ${op.letra}, ${op.texto}, ${op.es_correcta || false}, ${i})
-      `;
+    if (tipo === 'opcion_multiple') {
+      for (const [i, op] of opciones.entries()) {
+        await sql`
+          INSERT INTO opciones (pregunta_id, letra, texto, es_correcta, orden)
+          VALUES (${pregunta.id}, ${op.letra}, ${op.texto}, ${op.es_correcta || false}, ${i})
+        `;
+      }
     }
 
     res.json(pregunta);
@@ -58,6 +61,7 @@ router.put('/:id', upload.single('imagen'), async (req, res) => {
     const { texto, orden } = req.body;
     const [actual] = await sql`SELECT * FROM preguntas WHERE id = ${req.params.id}`;
     if (!actual) return res.status(404).json({ error: 'Pregunta no encontrada' });
+    const tipo = req.body.tipo || actual.tipo;
 
     let imagen_url = actual.imagen_url, imagen_public_id = actual.imagen_public_id;
     if (req.file) {
@@ -68,12 +72,12 @@ router.put('/:id', upload.single('imagen'), async (req, res) => {
     }
 
     const [pregunta] = await sql`
-      UPDATE preguntas SET texto = ${texto}, orden = ${orden ?? actual.orden},
+      UPDATE preguntas SET texto = ${texto}, orden = ${orden ?? actual.orden}, tipo = ${tipo},
         imagen_url = ${imagen_url}, imagen_public_id = ${imagen_public_id}
       WHERE id = ${req.params.id} RETURNING *
     `;
 
-    if (req.body.opciones) {
+    if (tipo === 'opcion_multiple' && req.body.opciones) {
       const opciones = JSON.parse(req.body.opciones);
       await sql`DELETE FROM opciones WHERE pregunta_id = ${pregunta.id}`;
       for (const [i, op] of opciones.entries()) {
@@ -82,6 +86,8 @@ router.put('/:id', upload.single('imagen'), async (req, res) => {
           VALUES (${pregunta.id}, ${op.letra}, ${op.texto}, ${op.es_correcta || false}, ${i})
         `;
       }
+    } else if (tipo !== 'opcion_multiple') {
+      await sql`DELETE FROM opciones WHERE pregunta_id = ${pregunta.id}`;
     }
 
     res.json(pregunta);
