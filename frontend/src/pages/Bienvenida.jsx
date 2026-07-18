@@ -1,10 +1,39 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, EyeOff, FileCheck2 } from 'lucide-react';
+import { Clock, EyeOff, FileCheck2, Maximize, Minimize } from 'lucide-react';
 import { api } from '../lib/api';
 import FondoXiuhcoatl from '../components/FondoXiuhcoatl';
 import EscudoTilt from '../components/EscudoTilt';
 import BotonSitt from '../components/BotonSitt';
+
+function usarPantallaCompleta() {
+  const [soportado] = useState(() =>
+    typeof document !== 'undefined' &&
+    !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)
+  );
+  const [activa, setActiva] = useState(false);
+
+  useEffect(() => {
+    const detectar = () => setActiva(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', detectar);
+    document.addEventListener('webkitfullscreenchange', detectar);
+    return () => {
+      document.removeEventListener('fullscreenchange', detectar);
+      document.removeEventListener('webkitfullscreenchange', detectar);
+    };
+  }, []);
+
+  function alternar() {
+    const el = document.documentElement;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el).catch(() => {});
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen)?.call(document).catch(() => {});
+    }
+  }
+
+  return { soportado, activa, alternar };
+}
 
 export default function Bienvenida() {
   const [cuestionario, setCuestionario] = useState(null);
@@ -12,6 +41,7 @@ export default function Bienvenida() {
   const [cargando, setCargando] = useState(true);
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
+  const pantallaCompleta = usarPantallaCompleta();
 
   useEffect(() => {
     const idParam = new URLSearchParams(window.location.search).get('c');
@@ -53,6 +83,23 @@ export default function Bienvenida() {
   return (
     <>
       <FondoXiuhcoatl />
+
+      {pantallaCompleta.soportado && (
+        <button
+          onClick={pantallaCompleta.alternar}
+          aria-label="Pantalla completa"
+          style={{
+            position: 'fixed', top: 16, right: 16, zIndex: 20,
+            width: 38, height: 38, borderRadius: '50%', border: '1px solid rgba(192,162,82,0.4)',
+            background: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+        >
+          {pantallaCompleta.activa
+            ? <Minimize size={17} color="var(--dorado)" />
+            : <Maximize size={17} color="var(--dorado)" />}
+        </button>
+      )}
+
       <div
         style={{
           minHeight: '100svh', width: '100%', maxWidth: 480, margin: '0 auto',
