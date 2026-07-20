@@ -68,9 +68,14 @@ async function datosIndividual(sesionId) {
 }
 
 router.get('/individual/:sesionId', async (req, res) => {
-  const datos = await datosIndividual(req.params.sesionId);
-  if (!datos) return res.status(404).json({ error: 'Sesión no encontrada' });
-  res.json(datos);
+  try {
+    const datos = await datosIndividual(req.params.sesionId);
+    if (!datos) return res.status(404).json({ error: 'Sesión no encontrada' });
+    res.json(datos);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al cargar el reporte individual' });
+  }
 });
 
 // ---------- Datos grupales (indicador SITT) ----------
@@ -122,9 +127,14 @@ async function datosGrupal(cuestionarioId) {
 }
 
 router.get('/grupal/:cuestionarioId', async (req, res) => {
-  const datos = await datosGrupal(req.params.cuestionarioId);
-  if (!datos) return res.status(404).json({ error: 'Cuestionario no encontrado' });
-  res.json(datos);
+  try {
+    const datos = await datosGrupal(req.params.cuestionarioId);
+    if (!datos) return res.status(404).json({ error: 'Cuestionario no encontrado' });
+    res.json(datos);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al cargar el reporte grupal' });
+  }
 });
 
 // ---------- Encabezado compartido del PDF ----------

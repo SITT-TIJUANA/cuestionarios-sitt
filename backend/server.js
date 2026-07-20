@@ -12,6 +12,12 @@ import adminReportes from './routes/adminReportes.js';
 
 const app = express();
 
+// Red de seguridad: si algo revienta sin estar controlado, se registra en los
+// Logs pero YA NO tumba el servidor completo (antes un error en una sola
+// pantalla dejaba caída toda la app, incluyendo el login).
+process.on('unhandledRejection', (err) => console.error('Error no controlado (unhandledRejection):', err));
+process.on('uncaughtException', (err) => console.error('Error no controlado (uncaughtException):', err));
+
 app.use(cors());
 app.use(express.json());
 
